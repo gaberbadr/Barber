@@ -9,7 +9,8 @@ namespace Application.Features.Auth.Queries.GetCurrentUser
     {
         public GetCurrentUserQueryMappingProfile()
         {
-            CreateMap<ApplicationUser, UserDTO>();
+            CreateMap<ApplicationUser, UserDTO>()
+                .ForMember(dest => dest.ProfilePictureUrl, opt => opt.MapFrom(src => src.ProfilePictureUrl));
         }
     }
 }

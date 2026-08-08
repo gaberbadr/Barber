@@ -25,9 +25,23 @@ namespace Domain.Entities
 
         public DateTime? CodeExpiresAt { get; set; }
 
+        // Barber-specific properties
+        public int BookingDurationMinutes { get; set; } = 30;
+
+        public bool AcceptingBookings { get; set; } = true;
+
+        // Profile picture stored from Cloudinary
+        public string? ProfilePictureUrl { get; set; }
+
         // Navigation Properties
         public ICollection<RefreshTokenTable> RefreshTokens { get; set; } = new List<RefreshTokenTable>();
 
         public ICollection<LoginAttempt> LoginAttempts { get; set; } = new List<LoginAttempt>();
+
+        public ICollection<Booking> CustomerBookings { get; set; } = new List<Booking>();
+
+        public ICollection<Booking> BarberBookings { get; set; } = new List<Booking>();
+
+        public ICollection<BarberWorkingHour> BarberWorkingHours { get; set; } = new List<BarberWorkingHour>();
     }
 }

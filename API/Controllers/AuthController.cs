@@ -5,11 +5,14 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Application.Features.Auth.Commands.GoogleLogin;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.SendOTP;
 using Application.Features.Auth.Commands.VerifyOTP;
+using Application.Features.Auth.Commands.UpdateProfilePicture;
+using Application.Features.Auth.Commands.DeleteProfilePicture;
 using API.Controllers;
 using API.Helpers;
 using Domain.Entities;
@@ -247,6 +250,80 @@ namespace Zero.Controllers
             }
 
             return Ok(new { message = "Logout successful." });
+        }
+
+        /// <summary>
+        /// Uploads or updates the authenticated user's profile picture.
+        /// Replaces existing profile picture if present.
+        /// Requires JWT authentication.
+        /// </summary>
+        /// <param name="request">Profile picture file (max 5MB, formats: jpg, jpeg, png, gif, webp)</param>
+        /// <returns>Updated profile picture URL</returns>
+        [Authorize]
+        [HttpPut("me/profile-picture")]
+        [ProducesResponseType(typeof(ProfilePictureResponseDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateProfilePicture([FromForm] UpdateProfilePictureRequest request)
+        {
+            if (!_currentUser.IsAuthenticated || string.IsNullOrEmpty(_currentUser.UserId))
+            {
+                return Unauthorized(new { message = "User must be authenticated." });
+            }
+
+            if (request?.File == null || request.File.Length == 0)
+            {
+                return BadRequest(new { message = "No file was uploaded." });
+            }
+
+            var command = new UpdateProfilePictureCommand
+            {
+                UserId = _currentUser.UserId,
+                ProfilePictureFile = request.File
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (result.IsError)
+            {
+                return HandleErrorResult(result.Errors);
+            }
+
+            return Ok(result.Value);
+        }
+
+        /// <summary>
+        /// Deletes the authenticated user's profile picture.
+        /// Requires JWT authentication.
+        /// </summary>
+        /// <returns>Success message</returns>
+        [Authorize]
+        [HttpDelete("me/profile-picture")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteProfilePicture()
+        {
+            if (!_currentUser.IsAuthenticated || string.IsNullOrEmpty(_currentUser.UserId))
+            {
+                return Unauthorized(new { message = "User must be authenticated." });
+            }
+
+            var command = new DeleteProfilePictureCommand
+            {
+                UserId = _currentUser.UserId
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (result.IsError)
+            {
+                return HandleErrorResult(result.Errors);
+            }
+
+            return Ok(new { message = "Profile picture deleted successfully." });
         }
 
         // Handles ErrorOr errors and returns appropriate HTTP responses.

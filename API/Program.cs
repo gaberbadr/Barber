@@ -8,6 +8,8 @@ using Infrastructure.Persistence.Seed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================
@@ -48,13 +50,13 @@ try
     await context.Database.MigrateAsync();// Update-DataBase
     await DefaultRolesSeeder.SeedRolesAsync(userrole);
     await DefaultAdminSeeder.SeedAppUserAsync(usermanger, userrole);
+    await DatabaseSeeder.SeedAsync(context, usermanger, userrole);
 }
 catch (Exception ex)
 {
     var logger = LoggerFactory.CreateLogger<Program>();
     logger.LogError(ex, "their are problem during migration");
 }
-
 
 app.UseSwaggerDocumentation();
 app.UseApiMiddlewares();

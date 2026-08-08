@@ -13,8 +13,8 @@ namespace Controllers
         {
             return Ok(new
             {
-                message = "Welcome to Zero API",
-                version = "1.0",
+                message = "Welcome to Barber API",
+                version = "1.1",
                 status = "Running",
                 documentation = $"{Request.Scheme}://{Request.Host}/swagger",
                 endpoints = new

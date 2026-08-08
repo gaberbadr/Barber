@@ -62,7 +62,7 @@ namespace Infrastructure.Storage.Services
                 var uploadParams = new ImageUploadParams
                 {
                     File = new FileDescription(fileName, imageStream),
-                    Folder = "New-app-images"
+                    Folder = "barber-app-images"
                 };
 
                 _logger.LogInformation("Uploading image: {FileName}", fileName);
