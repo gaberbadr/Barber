@@ -1,0 +1,266 @@
+Solution
+│
+├── src
+│   │
+│   ├── Api
+│   │   ├── Controllers
+│   │   │   ├── BaseApiController.cs
+│   │   │   ├── HomeController.cs
+│   │   │   └── ProductController.cs            // Example Only
+│   │   │
+│   │   ├── Requests
+│   │   │   └── Product
+│   │   │
+│   │   ├── Filters
+│   │   │   ├── CachedAttribute.cs
+│   │   │   └── ValidationFilter.cs
+│   │   │
+│   │   ├── Middleware
+│   │   │   ├── ExceptionMiddleware.cs
+│   │   │   └── RateLimitMiddleware.cs
+│   │   │
+│   │   ├── Extensions
+│   │   │   ├── AuthenticationExtensions.cs
+│   │   │   ├── AuthorizationExtensions.cs
+│   │   │   ├── CorsExtensions.cs
+│   │   │   ├── SwaggerExtensions.cs
+│   │   │   └── MiddlewareExtensions.cs
+│   │   │
+│   │   ├── Helpers
+│   │   │   └── CurrentUser.cs
+│   │   │
+│   │   │
+│   │   ├── Program.cs
+│   │   └── appsettings.json
+│   │
+│   ├── Application
+│   │   │
+│   │   ├── Common
+│   │   │   ├── Behaviors
+│   │   │   │   ├── ValidationBehavior.cs
+│   │   │   │   ├── LoggingBehavior.cs
+│   │   │   │   ├── PerformanceBehavior.cs
+│   │   │   │   ├── TransactionBehavior.cs
+│   │   │   │   ├── AuthorizationBehavior.cs
+│   │   │   │   └── UnhandledExceptionBehavior.cs
+│   │   │   │
+│   │   │   ├── Exceptions
+│   │   │   │   ├── NotFoundException.cs
+│   │   │   │   └── ValidationException.cs
+│   │   │   ├── Helpers
+│   │   │   ├── Interfaces
+│   │   │   ├── Models
+│   │   │   │   └── ApiResponse.cs
+│   │   │   ├── Pagination
+│   │   │   │   ├── PaginationRequest.cs
+│   │   │   │   └── PaginationResponse.cs
+│   │   │   └── Responses
+│   │   │       ├── ApiResponse.cs
+│   │   │       ├── ErrorResponse.cs
+│   │   │       └── Result.cs
+│   │   │
+│   │   ├── Features
+│   │   │   └── Product            //For example
+│   │   │       ├── Commands
+│   │   │       │   ├── Create
+│   │   │       │     ├── AddProductCommand.cs
+│   │   │       │     ├── AddProductCommandHandler.cs
+│   │   │       │     ├── AddProductCommandMappingProfile.cs
+│   │   │       │     ├── AddProductCommandMappingProfile.cs
+│   │   │       │     └── AddProductCommandValidator.cs
+│   │   │       │   ├── Update
+│   │   │       │   └── Delete
+│   │   │       │
+│   │   │       ├── Queries
+│   │   │       │   ├── GetAll
+│   │   │       │       ├── GetAllProductsQuery.cs
+│   │   │       │       ├── GetAllProductsQueryHandler.cs
+│   │   │       │       ├── GetProductsSpecification.cs
+│   │   │       │       └── GetAllProductsQueryMappingProfile.cs
+│   │   │       │   ├── GetById
+│   │   │       │   └── Search
+│   │   │       │
+│   │   │       └── DTOs
+│   │   │
+│   │   └── ApplicationDependencyInjection.cs
+│   │
+│   ├── Domain
+│   │   ├── Common
+│   │   ├── Entities
+│   │   ├── Enums
+│   │   ├── Repositories
+│   │   ├── Specifications
+│   │   └── ValueObjects
+│   │
+│   └── Infrastructure
+│       │
+│       ├── Authentication
+│       │   ├── JwtService.cs
+│       │   ├── JwtOptions.cs
+│       │   └── RefreshTokenService.cs
+│       │
+│       │
+│       ├── BackgroundServices
+│       │
+│       ├── Caching
+│       │   ├── Options
+│       │   │   └── CacheOptions.cs
+│       │   └── Services
+│       │       └── CacheService.cs
+│       │
+│       ├── Email
+│       │   ├── EmailService.cs
+│       │   ├── EmailOptions.cs 
+│       │   ├── SmtpEmailSender.cs
+│       │   └── Templates.cs
+│       │
+│       │
+│       │
+│       │
+│       ├── Persistence
+│       │   ├── Context
+│       │   │   └── ApplicationDbContext.cs
+│       │   │
+│       │   ├── Configurations
+│       │   │
+│       │   │
+│       │   ├── Migrations
+│       │   │
+│       │   ├── Repositories
+│       │   │   ├── GenericRepository.cs
+│       │   │   └── UnitOfWork.cs
+│       │   │
+│       │   └── Seed
+│       │       ├── DatabaseSeeder.cs
+│       │       ├── DefaultAdminSeeder.cs
+│       │       ├── DefaultRolesSeeder.cs
+│       │       └── SeedExtensions.cs
+│       │
+│       ├── Storage
+│       │   ├── Options
+│       │   │   └── CloudinaryOptions.cs
+│       │   └── Services
+│       │       └── CloudinaryStorageService.cs
+│       │
+│       └── InfrastructureDependencyInjection.cs
+└──
+
+
+# Architecture Rules
+
+## General Rules
+
+- Always follow the provided project structure and Clean Architecture.
+- Do not create new folders, projects, or layers unless they are absolutely necessary.
+- Prefer extending the existing architecture over introducing a new pattern.
+- Keep the solution simple and avoid unnecessary abstractions.
+
+## Reuse Existing Code
+
+Before creating any new class, interface, service, helper, extension, validator, DTO, repository, middleware, or utility:
+
+1. Search the entire solution.
+2. Reuse existing implementations whenever possible.
+3. Extend existing classes instead of duplicating functionality.
+4. Never create duplicate logic.
+
+Always assume the required component may already exist somewhere in the solution.
+
+## Dependency Rules
+
+- Domain must never depend on Application, Infrastructure, or Api.
+- Application must never depend on Infrastructure or Api.
+- Infrastructure may depend on Application and Domain.
+- Api depends on Application and Infrastructure only.
+
+Never violate these dependency rules.
+
+## Existing Packages
+
+Always use the packages already available in the solution before introducing new ones.
+
+Examples:
+
+- ErrorOr
+- MediatR
+- FluentValidation
+- AutoMapper
+- Entity Framework Core
+- ASP.NET Identity
+
+Do not introduce an alternative package that solves the same problem.
+
+## Error Handling
+
+Always use ErrorOr for returning errors.
+
+Do not throw exceptions for business validation.
+
+Return ErrorOr<T> whenever appropriate.
+
+## Validation
+
+Always use FluentValidation.
+
+Never perform validation inside Controllers.
+
+Never duplicate validation logic.
+
+## Mapping
+
+Use AutoMapper when mapping between entities and DTOs.
+
+Reuse existing Mapping Profiles whenever possible.
+
+## Dependency Injection
+
+Register all services using the existing DependencyInjection.cs files.
+
+Do not register services directly inside Program.cs unless absolutely necessary.
+
+## Feature Organization
+
+Every feature must remain self-contained.
+
+Commands, Queries, DTOs, Validators, Mappings, and Specifications should stay inside the same Feature folder.
+
+Do not move feature-specific files into Common.
+
+## Naming
+
+Follow the existing naming conventions.
+
+Do not invent different naming styles.
+
+Keep file names consistent with the rest of the solution.
+
+## Before Writing Code
+
+Before implementing any feature:
+
+- Search for an existing implementation.
+- Search for similar logic.
+- Search for reusable services.
+- Search for reusable interfaces.
+- Search for reusable DTOs.
+- Search for reusable validators.
+- Search for reusable extension methods.
+
+Reuse first.
+Create second.
+
+## Performance
+
+Avoid unnecessary database queries.
+
+Avoid duplicate repository calls.
+
+Use existing caching mechanisms whenever appropriate.
+
+## Final Rule
+
+If you are unsure where something belongs:
+
+Do not guess.
+
+Analyze the existing architecture first and place it where it is most consistent with the current solution.

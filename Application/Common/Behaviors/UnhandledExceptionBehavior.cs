@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MediatR;
+using Microsoft.Extensions.Logging;
+
+namespace Application.Common.Behaviors
+{
+    //this behavior will excute before the handler , its like interceptor in angular but it happened after validation behavior
+    public class UnhandledExceptionBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
+    {
+        private readonly ILogger<TRequest> _logger;
+
+        public UnhandledExceptionBehavior(ILogger<TRequest> logger)
+        {
+            _logger = logger;
+        }
+
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await next();
+            }
+            catch (Exception ex)
+            {
+                var requestName = typeof(TRequest).Name;
+                _logger.LogInformation($"Unhandled exception occured with request name :{requestName} ,{request}");
+                throw;
+            }
+        }
+    }
+}
