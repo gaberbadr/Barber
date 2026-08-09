@@ -20,13 +20,19 @@ namespace Domain.Repositories
         Task AddAsync(TEntity entity);
         void Update(TEntity entity);
         void Delete(TEntity entity);
+        Task<TEntity?> DeleteAsync(TEntity entity);
+        Task<TEntity?> GetByIdAsync(TKey id);
 
         // ==================== QUERY OPERATIONS ====================
         Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate);
 
         Task<TEntity?> FindFirstAsync(Expression<Func<TEntity, bool>> predicate);
+        Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> predicate);
         Task<int> DeleteRangeAsync(Expression<Func<TEntity, bool>> predicate);
         Task AddRangeAsync(IEnumerable<TEntity> entities);
+
+        // ==================== QUERYABLE OPERATIONS ====================
+        IQueryable<TEntity> GetIQueryable();
 
         // ==================== SPECIFICATION PATTERN OPERATIONS ====================
 

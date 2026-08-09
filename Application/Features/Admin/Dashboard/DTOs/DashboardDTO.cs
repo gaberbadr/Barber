@@ -61,6 +61,7 @@ namespace Application.Features.Admin.Dashboard.DTOs
     {
         public int Id { get; set; }
         public string CustomerName { get; set; } = string.Empty;
+        public string? CustomerPhone { get; set; }
         public string CustomerEmail { get; set; } = string.Empty;
         public string BarberName { get; set; } = string.Empty;
         public DateOnly BookingDate { get; set; }

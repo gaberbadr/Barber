@@ -19,6 +19,14 @@ namespace Application.Features.Bookings.Commands.Create
 
             RuleFor(x => x.ServiceIds)
                 .NotEmpty().WithMessage("At least one service must be selected.");
+
+            RuleFor(x => x.FullName)
+                .NotEmpty().WithMessage("Full name is required.")
+                .Length(2, 100).WithMessage("Full name must be between 2 and 100 characters.");
+
+            RuleFor(x => x.PhoneNumber)
+                .NotEmpty().WithMessage("Phone number is required.")
+                .Matches(@"^\d{10,15}$").WithMessage("Phone number must be between 10 and 15 digits.");
         }
     }
 }

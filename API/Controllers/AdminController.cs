@@ -8,6 +8,11 @@ using Application.Features.Admin.Dashboard.Queries.GetMonthlyReport;
 using Application.Features.Admin.Dashboard.Queries.GetSettings;
 using Application.Features.Admin.Dashboard.Queries.GetTopBarbers;
 using Application.Features.Admin.Dashboard.Queries.GetTopServices;
+using Application.Features.Admin.Coupons.Commands.CreateCoupon;
+using Application.Features.Admin.Coupons.Commands.DeleteCoupon;
+using Application.Features.Admin.Coupons.Queries.GetAllCoupons;
+using Application.Features.Admin.Barbers.Commands.AddBarber;
+using Application.Features.Admin.Barbers.Commands.RemoveBarber;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -160,6 +165,93 @@ namespace API.Controllers
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
             return Ok(new { message = "User unblocked successfully." });
+        }
+
+        /// <summary>
+        /// Get all coupons with optional filtering.
+        /// </summary>
+        [HttpGet("coupons")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetCoupons(
+            [FromQuery] bool? isActive,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 20)
+        {
+            var result = await _mediator.Send(new GetAllCouponsQuery
+            {
+                IsActive = isActive,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return Ok(result.Value);
+        }
+
+        /// <summary>
+        /// Create a new coupon.
+        /// </summary>
+        [HttpPost("coupons")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> CreateCoupon([FromBody] CreateCouponCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return CreatedAtAction(nameof(GetCoupons), result.Value);
+        }
+
+        /// <summary>
+        /// Delete a coupon.
+        /// </summary>
+        [HttpDelete("coupons/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteCoupon(int id)
+        {
+            var result = await _mediator.Send(new DeleteCouponCommand { CouponId = id });
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return Ok(new { message = "Coupon deleted successfully." });
+        }
+
+        /// <summary>
+        /// Get all barbers.
+        /// </summary>
+        [HttpGet("barbers")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetBarbers()
+        {
+            var result = await _mediator.Send(new Application.Features.Barbers.Queries.GetAll.GetAllBarbersQuery());
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return Ok(result.Value);
+        }
+
+        /// <summary>
+        /// Create a new barber.
+        /// </summary>
+        [HttpPost("barbers")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> AddBarber([FromBody] AddBarberCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return CreatedAtAction(nameof(GetBarbers), result.Value);
+        }
+
+        /// <summary>
+        /// Remove a barber (deactivate).
+        /// </summary>
+        [HttpDelete("barbers/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> RemoveBarber(string id)
+        {
+            var result = await _mediator.Send(new RemoveBarberCommand { BarberId = id });
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return Ok(new { message = "Barber removed successfully." });
         }
 
         /// <summary>

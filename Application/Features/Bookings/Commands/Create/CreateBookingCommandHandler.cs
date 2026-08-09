@@ -37,12 +37,12 @@ namespace Application.Features.Bookings.Commands.Create
             if (!customer.IsActive)
                 return Error.Failure("booking.customer.blocked", "Your account is blocked. Please contact support.");
 
-            // 2. Validate FullName and PhoneNumber
-            if (string.IsNullOrWhiteSpace(customer.FullName))
-                return Error.Validation("booking.customer.fullname.required", "Full name is required to make a booking.");
+            // 2. Validate FullName and PhoneNumber provided by customer
+            if (string.IsNullOrWhiteSpace(request.FullName))
+                return Error.Validation("booking.fullname.required", "Full name is required to make a booking.");
 
-            if (string.IsNullOrWhiteSpace(customer.PhoneNumber))
-                return Error.Validation("booking.customer.phone.required", "Phone number is required to make a booking.");
+            if (string.IsNullOrWhiteSpace(request.PhoneNumber))
+                return Error.Validation("booking.phone.required", "Phone number is required to make a booking.");
 
             // 3. Verify barber exists, is active, and is a Barber
             var barber = await _userManager.FindByIdAsync(request.BarberId);
@@ -156,7 +156,7 @@ namespace Application.Features.Bookings.Commands.Create
             {
                 var couponRepo = _unitOfWork.Repository<Coupon, int>();
                 coupon = await couponRepo.FindFirstAsync(c =>
-                    c.Code == request.CouponCode &&
+                    c.Code == request.CouponCode.ToUpper() &&
                     c.IsActive &&
                     !c.IsDeleted);
 
@@ -189,6 +189,8 @@ namespace Application.Features.Bookings.Commands.Create
                 TotalPrice = totalPrice,
                 CouponId = coupon?.Id,
                 CouponCodeSnapshot = couponCodeSnapshot,
+                CustomerNameSnapshot = request.FullName,
+                CustomerPhoneSnapshot = request.PhoneNumber,
                 Status = BookingStatus.Confirmed,
                 CreatedAt = DateTime.UtcNow
             };
@@ -222,7 +224,8 @@ namespace Application.Features.Bookings.Commands.Create
 
             // Map and return
             var dto = _mapper.Map<BookingDTO>(booking);
-            dto.CustomerName = customer.FullName;
+            dto.CustomerName = booking.CustomerNameSnapshot ?? request.FullName;
+            dto.CustomerPhone = booking.CustomerPhoneSnapshot;
             dto.BarberName = barber.FullName;
             dto.Items = _mapper.Map<List<BookingItemDTO>>(items);
             return dto;

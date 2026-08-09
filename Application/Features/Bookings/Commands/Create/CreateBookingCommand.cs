@@ -12,5 +12,7 @@ namespace Application.Features.Bookings.Commands.Create
         public TimeOnly StartTime { get; set; }
         public List<int> ServiceIds { get; set; } = new();
         public string? CouponCode { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
     }
 }

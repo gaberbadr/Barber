@@ -15,6 +15,8 @@ namespace Domain.Entities
         public decimal TotalPrice { get; set; }
         public int? CouponId { get; set; }
         public string? CouponCodeSnapshot { get; set; }
+        public string? CustomerNameSnapshot { get; set; }
+        public string? CustomerPhoneSnapshot { get; set; }
         public BookingStatus Status { get; set; } = BookingStatus.Confirmed;
         public DateTime? CancelledAt { get; set; }
         public string? CancelledBy { get; set; }

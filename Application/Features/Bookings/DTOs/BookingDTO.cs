@@ -7,6 +7,7 @@ namespace Application.Features.Bookings.DTOs
         public int Id { get; set; }
         public string CustomerId { get; set; } = string.Empty;
         public string CustomerName { get; set; } = string.Empty;
+        public string? CustomerPhone { get; set; }
         public string BarberId { get; set; } = string.Empty;
         public string BarberName { get; set; } = string.Empty;
         public DateOnly BookingDate { get; set; }

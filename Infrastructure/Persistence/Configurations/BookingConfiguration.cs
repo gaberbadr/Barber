@@ -34,6 +34,12 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(b => b.CouponCodeSnapshot)
                 .HasMaxLength(50);
 
+            builder.Property(b => b.CustomerNameSnapshot)
+                .HasMaxLength(255);
+
+            builder.Property(b => b.CustomerPhoneSnapshot)
+                .HasMaxLength(20);
+
             builder.Property(b => b.Status)
                 .HasConversion<string>()
                 .HasMaxLength(20)

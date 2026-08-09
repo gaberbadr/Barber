@@ -38,7 +38,9 @@ namespace API.Controllers
                 BookingDate = request.BookingDate,
                 StartTime = request.StartTime,
                 ServiceIds = request.ServiceIds,
-                CouponCode = request.CouponCode
+                CouponCode = request.CouponCode,
+                FullName = request.FullName,
+                PhoneNumber = request.PhoneNumber
             };
 
             var result = await _mediator.Send(command);
@@ -81,12 +83,11 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Get a specific booking by ID.
+        /// Get booking by ID.
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _mediator.Send(new GetBookingByIdQuery
@@ -139,5 +140,7 @@ namespace API.Controllers
         public TimeOnly StartTime { get; set; }
         public List<int> ServiceIds { get; set; } = new();
         public string? CouponCode { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
     }
 }

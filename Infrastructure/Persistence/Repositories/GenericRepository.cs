@@ -35,6 +35,11 @@ namespace Infrastructure.Persistence.Repositories
             return await _dbContext.Set<TEntity>().FindAsync(id);
         }
 
+        public async Task<TEntity?> GetByIdAsync(TKey id)
+        {
+            return await _dbContext.Set<TEntity>().FindAsync(id);
+        }
+
         public async Task<IEnumerable<TEntity>> GetAllAsNoTrackingAsync()
         {
             return await _dbContext.Set<TEntity>().AsNoTracking().ToListAsync();
@@ -65,12 +70,25 @@ namespace Infrastructure.Persistence.Repositories
             _dbContext.Set<TEntity>().Remove(entity);
         }
 
+        public async Task<TEntity?> DeleteAsync(TEntity entity)
+        {
+            _dbContext.Set<TEntity>().Remove(entity);
+            return entity;
+        }
+
         public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await _dbContext.Set<TEntity>().Where(predicate).ToListAsync();
         }
+
         public async Task<TEntity?> FindFirstAsync(
         Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbContext.Set<TEntity>()
+                .FirstOrDefaultAsync(predicate);
+        }
+
+        public async Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await _dbContext.Set<TEntity>()
                 .FirstOrDefaultAsync(predicate);
@@ -94,6 +112,11 @@ namespace Infrastructure.Persistence.Repositories
         public async Task AddRangeAsync(IEnumerable<TEntity> entities)
         {
             await _dbContext.Set<TEntity>().AddRangeAsync(entities);
+        }
+
+        public IQueryable<TEntity> GetIQueryable()
+        {
+            return _dbContext.Set<TEntity>();
         }
 
         //refactor function specifications pattern
@@ -124,9 +147,5 @@ namespace Infrastructure.Persistence.Repositories
 
             return await ApplySpecfications(spec).ToListAsync();
         }
-
-
-
-
     }
 }

@@ -42,14 +42,14 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllBookings
             var result = new List<AdminBookingDTO>();
             foreach (var booking in bookingList)
             {
-                var customer = await _userManager.FindByIdAsync(booking.CustomerId);
                 var barber = await _userManager.FindByIdAsync(booking.BarberId);
 
                 result.Add(new AdminBookingDTO
                 {
                     Id = booking.Id,
-                    CustomerName = customer?.FullName ?? "Unknown",
-                    CustomerEmail = customer?.Email ?? "",
+                    CustomerName = booking.CustomerNameSnapshot ?? "Unknown",
+                    CustomerPhone = booking.CustomerPhoneSnapshot,
+                    CustomerEmail = booking.Customer?.Email ?? "",
                     BarberName = barber?.FullName ?? "Unknown",
                     BookingDate = booking.BookingDate,
                     StartTime = booking.StartTime,
