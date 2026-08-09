@@ -50,6 +50,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllUsers
                     PhoneNumber = user.PhoneNumber,
                     IsActive = user.IsActive,
                     CreatedAt = user.CreatedAt,
+                    ProfilePictureUrl = user.ProfilePictureUrl,
                     Roles = roles.ToList()
                 });
             }

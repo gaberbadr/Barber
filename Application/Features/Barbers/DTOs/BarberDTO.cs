@@ -10,6 +10,7 @@ namespace Application.Features.Barbers.DTOs
         public bool AcceptingBookings { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? ProfilePictureUrl { get; set; }
         public List<BarberWorkingHourDTO> WorkingHours { get; set; } = new();
     }
 

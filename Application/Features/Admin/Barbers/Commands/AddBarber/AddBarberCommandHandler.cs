@@ -46,7 +46,8 @@ namespace Application.Features.Admin.Barbers.Commands.AddBarber
                 CreatedAt = DateTime.UtcNow
             };
 
-            var createResult = await _userManager.CreateAsync(barber, request.Password);
+            // Create user without password - barber will use Google Sign-in
+            var createResult = await _userManager.CreateAsync(barber);
             if (!createResult.Succeeded)
             {
                 var errorMessages = string.Join(", ", createResult.Errors.Select(e => e.Description));

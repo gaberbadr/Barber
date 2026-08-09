@@ -14,10 +14,6 @@ namespace Application.Features.Admin.Barbers.Commands.AddBarber
                 .NotEmpty().WithMessage("Email is required.")
                 .EmailAddress().WithMessage("Email must be valid.");
 
-            RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Password is required.")
-                .MinimumLength(6).WithMessage("Password must be at least 6 characters.");
-
             RuleFor(x => x.BookingDurationMinutes)
                 .GreaterThan(0).WithMessage("Booking duration must be greater than 0.");
         }

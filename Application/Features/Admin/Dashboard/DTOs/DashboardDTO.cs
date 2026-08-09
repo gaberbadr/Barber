@@ -80,6 +80,7 @@ namespace Application.Features.Admin.Dashboard.DTOs
         public string? PhoneNumber { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? ProfilePictureUrl { get; set; }
         public List<string> Roles { get; set; } = new();
     }
 }
