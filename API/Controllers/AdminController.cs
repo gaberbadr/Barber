@@ -16,6 +16,8 @@ using Application.Features.Admin.Barbers.Commands.RemoveBarber;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Requests.Admin;
+using Application.Common.Models;
 
 namespace API.Controllers
 {
@@ -38,7 +40,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new GetDashboardStatsQuery());
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -46,19 +48,16 @@ namespace API.Controllers
         /// </summary>
         [HttpGet("dashboard/monthly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetMonthlyReport(
-            [FromQuery] string period = "ThisMonth",
-            [FromQuery] DateOnly? fromDate = null,
-            [FromQuery] DateOnly? toDate = null)
+        public async Task<IActionResult> GetMonthlyReport([FromQuery] GetMonthlyReportRequest request)
         {
             var result = await _mediator.Send(new GetMonthlyReportQuery
             {
-                Period = period,
-                FromDate = fromDate,
-                ToDate = toDate
+                Period = request.Period,
+                FromDate = request.FromDate,
+                ToDate = request.ToDate
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -70,7 +69,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new GetTopBarbersQuery { Count = count });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -82,7 +81,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new GetTopServicesQuery { Count = count });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -90,25 +89,19 @@ namespace API.Controllers
         /// </summary>
         [HttpGet("bookings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetBookings(
-            [FromQuery] DateOnly? date,
-            [FromQuery] string? barberId,
-            [FromQuery] string? customerId,
-            [FromQuery] string? status,
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetBookings([FromQuery] GetAllBookingsApiRequest request)
         {
             var result = await _mediator.Send(new GetAllBookingsQuery
             {
-                Date = date,
-                BarberId = barberId,
-                CustomerId = customerId,
-                Status = status,
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                Date = request.Date,
+                BarberId = request.BarberId,
+                CustomerId = request.CustomerId,
+                Status = request.Status,
+                PageIndex = request.PageNumber,
+                PageSize = request.PageSize
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -116,21 +109,17 @@ namespace API.Controllers
         /// </summary>
         [HttpGet("users")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetUsers(
-            [FromQuery] string? searchTerm,
-            [FromQuery] bool? isActive,
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetUsers([FromQuery] GetAllUsersApiRequest request)
         {
             var result = await _mediator.Send(new GetAllUsersQuery
             {
-                SearchTerm = searchTerm,
-                IsActive = isActive,
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                SearchTerm = request.SearchTerm,
+                IsActive = request.IsActive,
+                PageIndex = request.PageNumber,
+                PageSize = request.PageSize
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -147,7 +136,7 @@ namespace API.Controllers
                 Block = true
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(new { message = "User blocked successfully." });
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "User blocked successfully." }));
         }
 
         /// <summary>
@@ -164,7 +153,7 @@ namespace API.Controllers
                 Block = false
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(new { message = "User unblocked successfully." });
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "User unblocked successfully." }));
         }
 
         /// <summary>
@@ -172,19 +161,16 @@ namespace API.Controllers
         /// </summary>
         [HttpGet("coupons")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetCoupons(
-            [FromQuery] bool? isActive,
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetCoupons([FromQuery] GetAllCouponsApiRequest request)
         {
             var result = await _mediator.Send(new GetAllCouponsQuery
             {
-                IsActive = isActive,
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                IsActive = request.IsActive,
+                PageIndex = request.PageNumber,
+                PageSize = request.PageSize
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -198,7 +184,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(command);
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return CreatedAtAction(nameof(GetCoupons), result.Value);
+            return CreatedAtAction(nameof(GetCoupons), ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -211,7 +197,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new DeleteCouponCommand { CouponId = id });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(new { message = "Coupon deleted successfully." });
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Coupon deleted successfully." }));
         }
 
         /// <summary>
@@ -223,7 +209,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new Application.Features.Barbers.Queries.GetAll.GetAllBarbersQuery());
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -237,7 +223,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(command);
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return CreatedAtAction(nameof(GetBarbers), result.Value);
+            return CreatedAtAction(nameof(GetBarbers), ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -251,7 +237,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new RemoveBarberCommand { BarberId = id });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(new { message = "Barber removed successfully." });
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Barber removed successfully." }));
         }
 
         /// <summary>
@@ -263,7 +249,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new GetGlobalSettingsQuery());
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -280,27 +266,7 @@ namespace API.Controllers
                 CancellationWindowHours = request.CancellationWindowHours
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
-
-        private IActionResult HandleErrorResult(IReadOnlyList<ErrorOr.Error> errors)
-        {
-            var firstError = errors.FirstOrDefault();
-            return firstError.Type switch
-            {
-                ErrorOr.ErrorType.NotFound => NotFound(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Validation => BadRequest(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Conflict => Conflict(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Unauthorized => Unauthorized(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Forbidden => Forbid(),
-                _ => StatusCode(500, new { message = firstError.Description })
-            };
-        }
-    }
-
-    public class UpdateGlobalSettingsRequest
-    {
-        public int MaximumBookingAdvanceDays { get; set; }
-        public int CancellationWindowHours { get; set; }
     }
 }

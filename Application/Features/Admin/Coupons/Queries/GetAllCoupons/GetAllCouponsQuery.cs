@@ -1,13 +1,12 @@
 using MediatR;
 using ErrorOr;
 using Application.Features.Coupons.DTOs;
+using Application.Common.Pagination;
 
 namespace Application.Features.Admin.Coupons.Queries.GetAllCoupons
 {
-    public class GetAllCouponsQuery : IRequest<ErrorOr<List<CouponDTO>>>
+    public class GetAllCouponsQuery : PaginationRequest, IRequest<ErrorOr<PaginationResponse<CouponDTO>>>
     {
         public bool? IsActive { get; set; }
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 20;
     }
 }

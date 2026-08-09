@@ -1,3 +1,4 @@
+using Application.Common.Pagination;
 using Application.Features.Coupons.DTOs;
 using AutoMapper;
 using Domain.Entities;
@@ -9,7 +10,7 @@ using Error = ErrorOr.Error;
 
 namespace Application.Features.Admin.Coupons.Queries.GetAllCoupons
 {
-    public class GetAllCouponsQueryHandler : IRequestHandler<GetAllCouponsQuery, ErrorOr<List<CouponDTO>>>
+    public class GetAllCouponsQueryHandler : IRequestHandler<GetAllCouponsQuery, ErrorOr<PaginationResponse<CouponDTO>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -20,7 +21,7 @@ namespace Application.Features.Admin.Coupons.Queries.GetAllCoupons
             _mapper = mapper;
         }
 
-        public async Task<ErrorOr<List<CouponDTO>>> Handle(GetAllCouponsQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<PaginationResponse<CouponDTO>>> Handle(GetAllCouponsQuery request, CancellationToken cancellationToken)
         {
             var couponRepo = _unitOfWork.Repository<Coupon, int>();
 
@@ -29,14 +30,16 @@ namespace Application.Features.Admin.Coupons.Queries.GetAllCoupons
             if (request.IsActive.HasValue)
                 query = query.Where(c => c.IsActive == request.IsActive.Value);
 
+            var totalCount = await query.CountAsync(cancellationToken);
+
             var coupons = await query
                 .OrderByDescending(c => c.CreatedAt)
-                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync(cancellationToken);
 
             var result = _mapper.Map<List<CouponDTO>>(coupons);
-            return result;
+            return new PaginationResponse<CouponDTO>(request.PageSize, request.PageIndex, totalCount, result);
         }
     }
 }

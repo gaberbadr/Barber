@@ -8,6 +8,8 @@ using Application.Features.Bookings.Queries.GetAvailableSlots;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Requests.Barbers;
+using Application.Common.Models;
 
 namespace API.Controllers
 {
@@ -31,7 +33,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new GetAllBarbersQuery());
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -44,7 +46,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new GetBarberByIdQuery { BarberId = id });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -60,7 +62,7 @@ namespace API.Controllers
                 Date = date
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new GetBarberByIdQuery { BarberId = _currentUser.UserId! });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -96,7 +98,7 @@ namespace API.Controllers
 
             var result = await _mediator.Send(command);
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -122,7 +124,7 @@ namespace API.Controllers
 
             var result = await _mediator.Send(command);
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -131,55 +133,19 @@ namespace API.Controllers
         [Authorize(Roles = "Barber")]
         [HttpGet("me/bookings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetMyBookings(
-            [FromQuery] DateOnly? fromDate,
-            [FromQuery] DateOnly? toDate,
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetMyBookings([FromQuery] GetMyBookingsApiRequest request)
         {
             var result = await _mediator.Send(new GetMyBarberBookingsQuery
             {
                 BarberId = _currentUser.UserId!,
-                FromDate = fromDate,
-                ToDate = toDate,
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                FromDate = request.FromDate,
+                ToDate = request.ToDate,
+                PageIndex = request.PageNumber,
+                PageSize = request.PageSize
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
-        private IActionResult HandleErrorResult(IReadOnlyList<ErrorOr.Error> errors)
-        {
-            var firstError = errors.FirstOrDefault();
-            return firstError.Type switch
-            {
-                ErrorOr.ErrorType.NotFound => NotFound(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Validation => BadRequest(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Conflict => Conflict(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Unauthorized => Unauthorized(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Forbidden => Forbid(),
-                _ => StatusCode(500, new { message = firstError.Description })
-            };
-        }
-    }
-
-    public class UpdateBookingSettingsRequest
-    {
-        public int BookingDurationMinutes { get; set; }
-        public bool AcceptingBookings { get; set; }
-    }
-
-    public class UpdateWorkingHoursRequest
-    {
-        public List<WorkingHourItem> WorkingHours { get; set; } = new();
-    }
-
-    public class WorkingHourItem
-    {
-        public DayOfWeek DayOfWeek { get; set; }
-        public TimeOnly OpeningTime { get; set; }
-        public TimeOnly ClosingTime { get; set; }
-        public bool IsClosed { get; set; }
     }
 }

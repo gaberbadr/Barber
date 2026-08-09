@@ -1,3 +1,4 @@
+using Application.Common.Pagination;
 using Application.Features.Admin.Dashboard.DTOs;
 using Domain.Entities;
 using ErrorOr;
@@ -8,7 +9,7 @@ using Error = ErrorOr.Error;
 
 namespace Application.Features.Admin.Dashboard.Queries.GetAllUsers
 {
-    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, ErrorOr<List<AdminUserDTO>>>
+    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, ErrorOr<PaginationResponse<AdminUserDTO>>>
     {
         private readonly UserManager<ApplicationUser> _userManager;
 
@@ -17,7 +18,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllUsers
             _userManager = userManager;
         }
 
-        public async Task<ErrorOr<List<AdminUserDTO>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<PaginationResponse<AdminUserDTO>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
             var query = _userManager.Users.Where(u => !u.IsDeleted);
 
@@ -32,9 +33,11 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllUsers
             if (request.IsActive.HasValue)
                 query = query.Where(u => u.IsActive == request.IsActive.Value);
 
+            var totalCount = await query.CountAsync(cancellationToken);
+
             var users = await query
                 .OrderByDescending(u => u.CreatedAt)
-                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync(cancellationToken);
 
@@ -55,7 +58,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllUsers
                 });
             }
 
-            return result;
+            return new PaginationResponse<AdminUserDTO>(request.PageSize, request.PageIndex, totalCount, result);
         }
     }
 }

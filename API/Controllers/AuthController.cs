@@ -14,10 +14,11 @@ using Application.Features.Auth.Commands.VerifyOTP;
 using Application.Features.Auth.Commands.UpdateProfilePicture;
 using Application.Features.Auth.Commands.DeleteProfilePicture;
 using API.Controllers;
-using API.Helpers;
 using Domain.Entities;
 using Requests.Auth;
 using Application.Features.Auth.DTOs;
+using Application.Common.Models;
+using API.Helpers;
 
 namespace Zero.Controllers
 {
@@ -64,7 +65,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(new { message = "Verification code sent successfully." });
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Verification code sent successfully." }));
         }
 
         /// <summary>
@@ -98,7 +99,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         // ========== Google Login ==========
@@ -200,7 +201,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         // Revokes a refresh token to invalidate it.
@@ -229,7 +230,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(new { message = "Refresh token revoked successfully." });
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Refresh token revoked successfully." }));
         }
 
         // Logs out the authenticated user by revoking all refresh tokens.
@@ -249,7 +250,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(new { message = "Logout successful." });
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Logout successful." }));
         }
 
         /// <summary>
@@ -290,7 +291,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -323,24 +324,10 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(new { message = "Profile picture deleted successfully." });
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Profile picture deleted successfully." }));
         }
 
-        // Handles ErrorOr errors and returns appropriate HTTP responses.
-        private IActionResult HandleErrorResult(IReadOnlyList<ErrorOr.Error> errors)
-        {
-            var firstError = errors.FirstOrDefault();
 
-            return firstError.Type switch
-            {
-                ErrorOr.ErrorType.NotFound => NotFound(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Validation => BadRequest(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Conflict => Conflict(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Unauthorized => Unauthorized(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Failure => BadRequest(new { message = firstError.Description }),
-                _ => StatusCode(500, new { message = firstError.Description })
-            };
-        }
 
         // Gets the client's IP address from the request.
         private string? GetClientIpAddress()

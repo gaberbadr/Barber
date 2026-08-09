@@ -14,7 +14,7 @@ namespace Controllers
             return Ok(new
             {
                 message = "Welcome to Barber API",
-                version = "1.3",
+                version = "1.5",
                 status = "Running",
                 documentation = $"{Request.Scheme}://{Request.Host}/swagger",
                 endpoints = new

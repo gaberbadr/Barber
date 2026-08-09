@@ -1,3 +1,4 @@
+using Application.Common.Pagination;
 using Application.Features.Bookings.DTOs;
 using AutoMapper;
 using Domain.Entities;
@@ -11,7 +12,7 @@ using Error = ErrorOr.Error;
 
 namespace Application.Features.Bookings.Queries.GetMyHistory
 {
-    public class GetMyBookingHistoryQueryHandler : IRequestHandler<GetMyBookingHistoryQuery, ErrorOr<List<BookingDTO>>>
+    public class GetMyBookingHistoryQueryHandler : IRequestHandler<GetMyBookingHistoryQuery, ErrorOr<PaginationResponse<BookingDTO>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -27,17 +28,19 @@ namespace Application.Features.Bookings.Queries.GetMyHistory
             _mapper = mapper;
         }
 
-        public async Task<ErrorOr<List<BookingDTO>>> Handle(GetMyBookingHistoryQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<PaginationResponse<BookingDTO>>> Handle(GetMyBookingHistoryQuery request, CancellationToken cancellationToken)
         {
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
 
             var bookings = await bookingRepo.FindAsync(b =>
                 b.CustomerId == request.CustomerId);
 
+            var totalCount = bookings.Count();
+
             var bookingList = bookings
                 .OrderByDescending(b => b.BookingDate)
                 .ThenByDescending(b => b.StartTime)
-                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToList();
 
@@ -58,7 +61,7 @@ namespace Application.Features.Bookings.Queries.GetMyHistory
                 dtos.Add(dto);
             }
 
-            return dtos;
+            return new PaginationResponse<BookingDTO>(request.PageSize, request.PageIndex, totalCount, dtos);
         }
     }
 }

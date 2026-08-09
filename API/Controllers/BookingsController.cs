@@ -7,6 +7,8 @@ using Application.Features.Bookings.Queries.GetMyUpcoming;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Requests.Bookings;
+using Application.Common.Models;
 
 namespace API.Controllers
 {
@@ -45,7 +47,7 @@ namespace API.Controllers
 
             var result = await _mediator.Send(command);
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -60,7 +62,7 @@ namespace API.Controllers
                 CustomerId = _currentUser.UserId!
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -68,18 +70,16 @@ namespace API.Controllers
         /// </summary>
         [HttpGet("my/history")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetMyHistory(
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetMyHistory([FromQuery] GetMyHistoryApiRequest request)
         {
             var result = await _mediator.Send(new GetMyBookingHistoryQuery
             {
                 CustomerId = _currentUser.UserId!,
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                PageIndex = request.PageNumber,
+                PageSize = request.PageSize
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace API.Controllers
                 RequestingUserId = _currentUser.UserId!
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
 
         /// <summary>
@@ -115,32 +115,7 @@ namespace API.Controllers
                 CancelledByUserId = _currentUser.UserId!
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(result.Value);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }
-
-        private IActionResult HandleErrorResult(IReadOnlyList<ErrorOr.Error> errors)
-        {
-            var firstError = errors.FirstOrDefault();
-            return firstError.Type switch
-            {
-                ErrorOr.ErrorType.NotFound => NotFound(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Validation => BadRequest(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Conflict => Conflict(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Unauthorized => Unauthorized(new { message = firstError.Description }),
-                ErrorOr.ErrorType.Forbidden => Forbid(),
-                _ => StatusCode(500, new { message = firstError.Description })
-            };
-        }
-    }
-
-    public class CreateBookingRequest
-    {
-        public string BarberId { get; set; } = string.Empty;
-        public DateOnly BookingDate { get; set; }
-        public TimeOnly StartTime { get; set; }
-        public List<int> ServiceIds { get; set; } = new();
-        public string? CouponCode { get; set; }
-        public string FullName { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
     }
 }
