@@ -24,15 +24,34 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllBookings
             _userManager = userManager;
         }
 
-        public async Task<ErrorOr<PaginationResponse<AdminBookingDTO>>> Handle(GetAllBookingsQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<PaginationResponse<AdminBookingDTO>>> Handle(
+     GetAllBookingsQuery request,
+     CancellationToken cancellationToken)
         {
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
+
+            BookingStatus? status = null;
+
+            if (!string.IsNullOrWhiteSpace(request.Status))
+            {
+                if (!Enum.TryParse<BookingStatus>(
+                    request.Status,
+                    ignoreCase: true,
+                    out var parsedStatus))
+                {
+                    return Error.Validation(
+                        code: "Booking.InvalidStatus",
+                        description: $"Invalid booking status: {request.Status}");
+                }
+
+                status = parsedStatus;
+            }
 
             var bookings = await bookingRepo.FindAsync(b =>
                 (!request.Date.HasValue || b.BookingDate == request.Date.Value) &&
                 (string.IsNullOrEmpty(request.BarberId) || b.BarberId == request.BarberId) &&
                 (string.IsNullOrEmpty(request.CustomerId) || b.CustomerId == request.CustomerId) &&
-                (string.IsNullOrEmpty(request.Status) || b.Status.ToString() == request.Status));
+                (!status.HasValue || b.Status == status.Value));
 
             var totalCount = bookings.Count();
 
@@ -44,6 +63,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllBookings
                 .ToList();
 
             var result = new List<AdminBookingDTO>();
+
             foreach (var booking in bookingList)
             {
                 var barber = await _userManager.FindByIdAsync(booking.BarberId);
@@ -64,7 +84,11 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllBookings
                 });
             }
 
-            return new PaginationResponse<AdminBookingDTO>(request.PageSize, request.PageIndex, totalCount, result);
+            return new PaginationResponse<AdminBookingDTO>(
+                request.PageSize,
+                request.PageIndex,
+                totalCount,
+                result);
         }
     }
 }
