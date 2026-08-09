@@ -4,7 +4,7 @@ namespace Application.Features.Admin.Coupons.Commands.CreateCoupon
 {
     public class CreateCouponCommandValidator : AbstractValidator<CreateCouponCommand>
     {
-        public CreateCouponCommandValidator()
+        public CreateCouponCommandValidator(TimeProvider timeProvider)
         {
             RuleFor(x => x.Code)
                 .NotEmpty().WithMessage("Coupon code is required.")
@@ -19,7 +19,7 @@ namespace Application.Features.Admin.Coupons.Commands.CreateCoupon
                 .LessThan(x => x.ExpiryDate).WithMessage("Start date must be before expiry date.");
 
             RuleFor(x => x.ExpiryDate)
-                .GreaterThan(DateTime.UtcNow).WithMessage("Expiry date must be in the future.");
+                .GreaterThan(timeProvider.GetLocalNow().DateTime).WithMessage("Expiry date must be in the future.");
 
             RuleFor(x => x.UsageLimit)
                 .GreaterThan(0).WithMessage("Usage limit must be greater than 0.")

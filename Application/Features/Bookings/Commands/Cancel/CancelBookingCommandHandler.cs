@@ -15,15 +15,18 @@ namespace Application.Features.Bookings.Commands.Cancel
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly TimeProvider _timeProvider;
 
         public CancelBookingCommandHandler(
             IUnitOfWork unitOfWork,
             UserManager<ApplicationUser> userManager,
-            IMapper mapper)
+            IMapper mapper,
+            TimeProvider timeProvider)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
+            _timeProvider = timeProvider;
         }
 
         public async Task<ErrorOr<BookingDTO>> Handle(CancelBookingCommand request, CancellationToken cancellationToken)
@@ -57,16 +60,17 @@ namespace Application.Features.Bookings.Commands.Cancel
             // Check cancellation window (16 hours before appointment)
             var appointmentDateTime = booking.BookingDate.ToDateTime(booking.StartTime);
             var cancellationDeadline = appointmentDateTime.AddHours(-settings.CancellationWindowHours);
-            var now = DateTime.UtcNow;
+            var localNow = _timeProvider.GetLocalNow().DateTime;
 
-            if (now > cancellationDeadline && !isAdmin)
+            if (localNow > cancellationDeadline && !isAdmin)
                 return Error.Validation("booking.cancellation.window.passed",
                     $"Bookings can only be cancelled at least {settings.CancellationWindowHours} hours before the appointment.");
 
+            var utcNow = _timeProvider.GetUtcNow().DateTime;
             booking.Status = BookingStatus.Cancelled;
-            booking.CancelledAt = now;
+            booking.CancelledAt = utcNow;
             booking.CancelledBy = request.CancelledByUserId;
-            booking.UpdatedAt = now;
+            booking.UpdatedAt = utcNow;
 
             bookingRepo.Update(booking);
             await _unitOfWork.CompleteAsync();

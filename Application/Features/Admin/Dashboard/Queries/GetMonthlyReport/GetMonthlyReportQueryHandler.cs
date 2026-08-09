@@ -11,15 +11,17 @@ namespace Application.Features.Admin.Dashboard.Queries.GetMonthlyReport
     public class GetMonthlyReportQueryHandler : IRequestHandler<GetMonthlyReportQuery, ErrorOr<List<MonthlyReportDTO>>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly TimeProvider _timeProvider;
 
-        public GetMonthlyReportQueryHandler(IUnitOfWork unitOfWork)
+        public GetMonthlyReportQueryHandler(IUnitOfWork unitOfWork, TimeProvider timeProvider)
         {
             _unitOfWork = unitOfWork;
+            _timeProvider = timeProvider;
         }
 
         public async Task<ErrorOr<List<MonthlyReportDTO>>> Handle(GetMonthlyReportQuery request, CancellationToken cancellationToken)
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);
             DateOnly fromDate, toDate;
 
             switch (request.Period.ToLower())

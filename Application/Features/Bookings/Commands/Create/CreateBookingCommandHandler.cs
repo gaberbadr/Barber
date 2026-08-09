@@ -16,15 +16,18 @@ namespace Application.Features.Bookings.Commands.Create
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly TimeProvider _timeProvider;
 
         public CreateBookingCommandHandler(
             IUnitOfWork unitOfWork,
             UserManager<ApplicationUser> userManager,
-            IMapper mapper)
+            IMapper mapper,
+            TimeProvider timeProvider)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
+            _timeProvider = timeProvider;
         }
 
         public async Task<ErrorOr<BookingDTO>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
@@ -67,7 +70,7 @@ namespace Application.Features.Bookings.Commands.Create
                 return Error.Failure("booking.settings.missing", "Booking settings not configured.");
 
             // 6. Verify date is not past and within advance booking window
-            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);
             if (request.BookingDate < today)
                 return Error.Validation("booking.date.past", "Cannot book in the past.");
 
@@ -163,7 +166,7 @@ namespace Application.Features.Bookings.Commands.Create
                 if (coupon == null)
                     return Error.Validation("booking.coupon.invalid", "Invalid coupon code.");
 
-                var now = DateTime.UtcNow;
+                var now = _timeProvider.GetLocalNow().DateTime;
                 if (now < coupon.StartDate || now > coupon.ExpiryDate)
                     return Error.Validation("booking.coupon.expired", "This coupon has expired.");
 

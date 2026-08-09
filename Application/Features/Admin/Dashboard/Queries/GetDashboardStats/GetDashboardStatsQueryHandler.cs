@@ -14,13 +14,16 @@ namespace Application.Features.Admin.Dashboard.Queries.GetDashboardStats
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly TimeProvider _timeProvider;
 
         public GetDashboardStatsQueryHandler(
             IUnitOfWork unitOfWork,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            TimeProvider timeProvider)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _timeProvider = timeProvider;
         }
 
         public async Task<ErrorOr<DashboardStatsDTO>> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
@@ -35,7 +38,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetDashboardStats
             var serviceRepo = _unitOfWork.Repository<Service, int>();
             var services = await serviceRepo.FindAsync(s => !s.IsDeleted);
 
-            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);
             var firstOfMonth = new DateOnly(today.Year, today.Month, 1);
 
             var confirmedBookings = allBookings.Where(b => b.Status == BookingStatus.Confirmed).ToList();

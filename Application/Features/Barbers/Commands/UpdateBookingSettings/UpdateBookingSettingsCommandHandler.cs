@@ -15,15 +15,18 @@ namespace Application.Features.Barbers.Commands.UpdateBookingSettings
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly TimeProvider _timeProvider;
 
         public UpdateBookingSettingsCommandHandler(
             UserManager<ApplicationUser> userManager,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            TimeProvider timeProvider)
         {
             _userManager = userManager;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _timeProvider = timeProvider;
         }
 
         public async Task<ErrorOr<BarberDTO>> Handle(UpdateBookingSettingsCommand request, CancellationToken cancellationToken)
@@ -39,7 +42,7 @@ namespace Application.Features.Barbers.Commands.UpdateBookingSettings
             // If changing duration, check for affected future bookings
             if (barber.BookingDurationMinutes != request.BookingDurationMinutes)
             {
-                var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+                var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);
                 var bookingRepo = _unitOfWork.Repository<Booking, int>();
                 var futureBookings = await bookingRepo.FindAsync(b =>
                     b.BarberId == request.BarberId &&
@@ -54,7 +57,7 @@ namespace Application.Features.Barbers.Commands.UpdateBookingSettings
 
             barber.BookingDurationMinutes = request.BookingDurationMinutes;
             barber.AcceptingBookings = request.AcceptingBookings;
-            barber.UpdatedAt = DateTime.UtcNow;
+            barber.UpdatedAt = _timeProvider.GetUtcNow().DateTime;
 
             await _userManager.UpdateAsync(barber);
 

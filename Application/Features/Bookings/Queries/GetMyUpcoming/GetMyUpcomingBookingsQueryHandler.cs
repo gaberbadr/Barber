@@ -15,20 +15,23 @@ namespace Application.Features.Bookings.Queries.GetMyUpcoming
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly TimeProvider _timeProvider;
 
         public GetMyUpcomingBookingsQueryHandler(
             IUnitOfWork unitOfWork,
             UserManager<ApplicationUser> userManager,
-            IMapper mapper)
+            IMapper mapper,
+            TimeProvider timeProvider)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
+            _timeProvider = timeProvider;
         }
 
         public async Task<ErrorOr<List<BookingDTO>>> Handle(GetMyUpcomingBookingsQuery request, CancellationToken cancellationToken)
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
 
             var bookings = await bookingRepo.FindAsync(b =>

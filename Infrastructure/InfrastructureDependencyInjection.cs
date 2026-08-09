@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +15,8 @@ using Infrastructure.Storage.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using Infrastructure.Time;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using Zero.Infrastructure.Caching.Services;
@@ -33,6 +35,9 @@ namespace Infrastructure
             AddUnitOfWork(services);
 
             AddCachingServices(services, configuration);
+
+            // Register TimeProvider
+            services.AddSingleton<TimeProvider, EgyptTimeProvider>();
 
             AddStorageServices(services, configuration);
 

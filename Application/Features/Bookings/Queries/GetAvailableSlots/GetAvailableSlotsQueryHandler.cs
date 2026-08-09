@@ -13,11 +13,13 @@ namespace Application.Features.Bookings.Queries.GetAvailableSlots
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly TimeProvider _timeProvider;
 
-        public GetAvailableSlotsQueryHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
+        public GetAvailableSlotsQueryHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, TimeProvider timeProvider)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _timeProvider = timeProvider;
         }
 
         public async Task<ErrorOr<List<AvailableSlotDTO>>> Handle(GetAvailableSlotsQuery request, CancellationToken cancellationToken)
@@ -44,7 +46,7 @@ namespace Application.Features.Bookings.Queries.GetAvailableSlots
                 return Error.Failure("settings.missing", "Settings not configured.");
 
             // Check date range
-            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);
             if (request.Date < today)
                 return new List<AvailableSlotDTO>();
 
@@ -90,7 +92,7 @@ namespace Application.Features.Bookings.Queries.GetAvailableSlots
             var slots = new List<AvailableSlotDTO>();
             var duration = barber.BookingDurationMinutes;
             var current = effectiveOpening;
-            var now = DateTime.UtcNow;
+            var now = _timeProvider.GetLocalNow().DateTime;
             var isToday = request.Date == today;
 
             while (current.AddMinutes(duration) <= effectiveClosing)

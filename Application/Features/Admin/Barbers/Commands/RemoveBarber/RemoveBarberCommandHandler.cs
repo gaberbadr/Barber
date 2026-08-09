@@ -12,11 +12,13 @@ namespace Application.Features.Admin.Barbers.Commands.RemoveBarber
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly TimeProvider _timeProvider;
 
-        public RemoveBarberCommandHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork)
+        public RemoveBarberCommandHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, TimeProvider timeProvider)
         {
             _userManager = userManager;
             _unitOfWork = unitOfWork;
+            _timeProvider = timeProvider;
         }
 
         public async Task<ErrorOr<Success>> Handle(RemoveBarberCommand request, CancellationToken cancellationToken)
@@ -33,7 +35,7 @@ namespace Application.Features.Admin.Barbers.Commands.RemoveBarber
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
             var upcomingBookings = await bookingRepo.FindAsync(b =>
                 b.BarberId == request.BarberId &&
-                b.BookingDate >= DateOnly.FromDateTime(DateTime.UtcNow.Date) &&
+                b.BookingDate >= DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date) &&
                 b.Status == BookingStatus.Confirmed);
 
             if (upcomingBookings.Any())
@@ -49,7 +51,7 @@ namespace Application.Features.Admin.Barbers.Commands.RemoveBarber
             // Deactivate the barber (not deleting, to preserve historical booking data)
             barber.IsActive = false;
             barber.AcceptingBookings = false;
-            barber.UpdatedAt = DateTime.UtcNow;
+            barber.UpdatedAt = _timeProvider.GetUtcNow().DateTime;
 
             await _userManager.UpdateAsync(barber);
 

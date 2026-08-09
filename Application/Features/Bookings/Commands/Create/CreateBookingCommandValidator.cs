@@ -4,14 +4,14 @@ namespace Application.Features.Bookings.Commands.Create
 {
     public class CreateBookingCommandValidator : AbstractValidator<CreateBookingCommand>
     {
-        public CreateBookingCommandValidator()
+        public CreateBookingCommandValidator(TimeProvider timeProvider)
         {
             RuleFor(x => x.BarberId)
                 .NotEmpty().WithMessage("Barber is required.");
 
             RuleFor(x => x.BookingDate)
                 .NotEmpty().WithMessage("Booking date is required.")
-                .Must(date => date >= DateOnly.FromDateTime(DateTime.UtcNow.Date))
+                .Must(date => date >= DateOnly.FromDateTime(timeProvider.GetLocalNow().Date))
                 .WithMessage("Booking date cannot be in the past.");
 
             RuleFor(x => x.StartTime)
