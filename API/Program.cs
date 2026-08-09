@@ -30,7 +30,7 @@ builder.Services.AddApiServices();
 // Identity, Authentication, and Authorization
 builder.Services.AddIdentityServices();
 builder.Services.AddAuthenticationServices(builder.Configuration);
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationServices();
 
 // ==========================================
 // Build and Configure Middleware

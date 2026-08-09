@@ -220,9 +220,21 @@ namespace Application.Features.Bookings.Commands.Create
                 couponRepo.Update(coupon);
             }
 
+            // 18. Update customer's ApplicationUser with booking information
+            customer.FullName = request.FullName;
+            customer.PhoneNumber = request.PhoneNumber;
+            customer.UpdatedAt = DateTime.UtcNow;
+            
+            var updateResult = await _userManager.UpdateAsync(customer);
+            if (!updateResult.Succeeded)
+            {
+                return Error.Failure("booking.customer.update.failed",
+                    "Failed to update customer information. Booking created but profile not updated.");
+            }
+
             await _unitOfWork.CompleteAsync();
 
-            // Map and return
+            // 19. Map and return
             var dto = _mapper.Map<BookingDTO>(booking);
             dto.CustomerName = booking.CustomerNameSnapshot ?? request.FullName;
             dto.CustomerPhone = booking.CustomerPhoneSnapshot;
