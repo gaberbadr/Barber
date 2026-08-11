@@ -95,15 +95,23 @@ namespace Application.Features.Bookings.Queries.GetAvailableSlots
             var now = _timeProvider.GetLocalNow().DateTime;
             var isToday = request.Date == today;
 
-            while (current.AddMinutes(duration) <= effectiveClosing)
+            while (true)
             {
                 var slotEnd = current.AddMinutes(duration);
+
+                // If adding duration caused a wrap around
+                if (slotEnd < current) 
+                    break;
+
+                // Break if the slot exceeds closing time
+                if (slotEnd > effectiveClosing)
+                    break;
 
                 // Skip past slots for today
                 if (isToday)
                 {
                     var slotDateTime = request.Date.ToDateTime(current);
-                    if (slotDateTime <= now)
+                    if (slotDateTime < now)
                     {
                         current = slotEnd;
                         continue;

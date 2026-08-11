@@ -6,6 +6,8 @@ using Application.Features.Admin.Dashboard.Queries.GetAllUsers;
 using Application.Features.Admin.Dashboard.Queries.GetDashboardStats;
 using Application.Features.Admin.Dashboard.Queries.GetMonthlyReport;
 using Application.Features.Admin.Dashboard.Queries.GetSettings;
+using Application.Features.Admin.Dashboard.Queries.GetShopWorkingHours;
+using Application.Features.Admin.Dashboard.Commands.UpdateShopWorkingHours;
 using Application.Features.Admin.Dashboard.Queries.GetTopBarbers;
 using Application.Features.Admin.Dashboard.Queries.GetTopServices;
 using Application.Features.Admin.Coupons.Commands.CreateCoupon;
@@ -13,11 +15,15 @@ using Application.Features.Admin.Coupons.Commands.DeleteCoupon;
 using Application.Features.Admin.Coupons.Queries.GetAllCoupons;
 using Application.Features.Admin.Barbers.Commands.AddBarber;
 using Application.Features.Admin.Barbers.Commands.RemoveBarber;
+using Application.Features.Admin.Services.Commands.CreateService;
+using Application.Features.Admin.Services.Commands.UpdateService;
+using Application.Features.Admin.Services.Commands.DeleteService;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Requests.Admin;
 using Application.Common.Models;
+using System.Linq;
 
 namespace API.Controllers
 {
@@ -267,6 +273,99 @@ namespace API.Controllers
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
             return Ok(ApiResponse<object>.SuccessResponse(result.Value));
+        }
+
+        /// <summary>
+        /// Get global shop working hours.
+        /// </summary>
+        [AllowAnonymous]
+        [HttpGet("shop-hours")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetShopWorkingHours()
+        {
+            var result = await _mediator.Send(new GetShopWorkingHoursQuery());
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
+        }
+
+        /// <summary>
+        /// Update global shop working hours.
+        /// </summary>
+        [HttpPut("shop-hours")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateShopWorkingHours([FromBody] UpdateShopWorkingHoursRequest request)
+        {
+            var result = await _mediator.Send(new UpdateShopWorkingHoursCommand
+            {
+                WorkingHours = request.WorkingHours.Select(w => new ShopWorkingHourInput
+                {
+                    DayOfWeek = w.DayOfWeek,
+                    OpeningTime = w.OpeningTime,
+                    ClosingTime = w.ClosingTime,
+                    IsClosed = w.IsClosed
+                }).ToList()
+            });
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
+        }
+
+        /// <summary>
+        /// Create a new service.
+        /// </summary>
+        [HttpPost("services")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateService([FromBody] CreateServiceRequest request)
+        {
+            var command = new CreateServiceCommand
+            {
+                Name = request.Name,
+                Description = request.Description,
+                Price = request.Price,
+                IsActive = request.IsActive
+            };
+
+            var result = await _mediator.Send(command);
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return CreatedAtAction(nameof(CreateService), ApiResponse<object>.SuccessResponse(result.Value));
+        }
+
+        /// <summary>
+        /// Update an existing service.
+        /// </summary>
+        [HttpPut("services/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateService(int id, [FromBody] UpdateServiceRequest request)
+        {
+            var command = new UpdateServiceCommand
+            {
+                Id = id,
+                Name = request.Name,
+                Description = request.Description,
+                Price = request.Price,
+                IsActive = request.IsActive
+            };
+
+            var result = await _mediator.Send(command);
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
+        }
+
+        /// <summary>
+        /// Delete a service.
+        /// </summary>
+        [HttpDelete("services/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> DeleteService(int id)
+        {
+            var result = await _mediator.Send(new DeleteServiceCommand { ServiceId = id });
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Service deleted successfully." }));
         }
     }
 }

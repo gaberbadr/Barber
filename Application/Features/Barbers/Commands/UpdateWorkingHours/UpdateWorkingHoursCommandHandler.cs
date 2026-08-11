@@ -6,6 +6,7 @@ using ErrorOr;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Error = ErrorOr.Error;
+using Domain.Enums;
 
 namespace Application.Features.Barbers.Commands.UpdateWorkingHours
 {
@@ -14,15 +15,18 @@ namespace Application.Features.Barbers.Commands.UpdateWorkingHours
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly TimeProvider _timeProvider;
 
         public UpdateWorkingHoursCommandHandler(
             UserManager<ApplicationUser> userManager,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            TimeProvider timeProvider)
         {
             _userManager = userManager;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _timeProvider = timeProvider;
         }
 
         public async Task<ErrorOr<BarberDTO>> Handle(UpdateWorkingHoursCommand request, CancellationToken cancellationToken)
@@ -36,9 +40,55 @@ namespace Application.Features.Barbers.Commands.UpdateWorkingHours
                 return Error.Forbidden("barber.not.barber", "User is not a barber.");
 
             var workingHoursRepo = _unitOfWork.Repository<BarberWorkingHour, int>();
+            var bookingRepo = _unitOfWork.Repository<Booking, int>();
+
+            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
+            var upcomingBookings = await bookingRepo.FindAsync(b => 
+                b.BarberId == request.BarberId && 
+                b.BookingDate >= today && 
+                b.Status == BookingStatus.Confirmed);
+
+            var existingHours = await workingHoursRepo.FindAsync(w => w.BarberId == request.BarberId);
+            
+            var shopHoursRepo = _unitOfWork.Repository<ShopWorkingHour, int>();
+            var allShopHours = await shopHoursRepo.GetAllAsync();
+
+            // Validate that we are not changing hours for a day with upcoming bookings,
+            // and that barber hours do not exceed shop hours.
+            foreach (var reqHour in request.WorkingHours)
+            {
+                // Verify against global shop hours
+                var shopHour = allShopHours.FirstOrDefault(s => s.DayOfWeek == reqHour.DayOfWeek);
+                if (!reqHour.IsClosed && shopHour != null && !shopHour.IsClosed)
+                {
+                    if (reqHour.OpeningTime < shopHour.OpeningTime || reqHour.ClosingTime > shopHour.ClosingTime)
+                    {
+                        return Error.Validation("workinghours.outside.shop", 
+                            $"You cannot set working hours outside the shop's global hours ({shopHour.OpeningTime} - {shopHour.ClosingTime}) for {reqHour.DayOfWeek}. Please contact the admin.");
+                    }
+                }
+
+                var existing = existingHours.FirstOrDefault(h => h.DayOfWeek == reqHour.DayOfWeek);
+                bool isChanged = false;
+                
+                if (existing == null) 
+                    isChanged = true;
+                else if (existing.OpeningTime != reqHour.OpeningTime || 
+                         existing.ClosingTime != reqHour.ClosingTime || 
+                         existing.IsClosed != reqHour.IsClosed) 
+                    isChanged = true;
+
+                if (isChanged)
+                {
+                    var hasBookings = upcomingBookings.Any(b => b.BookingDate.DayOfWeek == reqHour.DayOfWeek);
+                    if (hasBookings)
+                    {
+                        return Error.Conflict("workinghours.conflict", $"Cannot change working hours for {reqHour.DayOfWeek} because there are upcoming bookings on this day.");
+                    }
+                }
+            }
 
             // Remove existing working hours for this barber
-            var existingHours = await workingHoursRepo.FindAsync(w => w.BarberId == request.BarberId);
             foreach (var existing in existingHours)
             {
                 workingHoursRepo.Delete(existing);

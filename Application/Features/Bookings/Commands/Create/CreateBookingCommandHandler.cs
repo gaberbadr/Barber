@@ -74,9 +74,18 @@ namespace Application.Features.Bookings.Commands.Create
                 return Error.Failure("booking.settings.missing", "Booking settings not configured.");
 
             // 6. Verify date is not past and within advance booking window
-            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);
+            var nowDateTime = _timeProvider.GetLocalNow().DateTime;
+            var today = DateOnly.FromDateTime(nowDateTime);
+            
             if (request.BookingDate < today)
                 return Error.Validation("booking.date.past", "Cannot book in the past.");
+                
+            if (request.BookingDate == today)
+            {
+                var nowTime = TimeOnly.FromDateTime(nowDateTime);
+                if (request.StartTime < nowTime)
+                    return Error.Validation("booking.time.past", "Cannot book a time slot in the past.");
+            }
 
             var maxDate = today.AddDays(settings.MaximumBookingAdvanceDays);
             if (request.BookingDate > maxDate)
@@ -99,8 +108,8 @@ namespace Application.Features.Bookings.Commands.Create
             if (barberHours == null || barberHours.IsClosed)
                 return Error.Validation("booking.barber.not.working", "The barber is not working on this day.");
 
-            // 9. Verify slot matches barber's booking duration
             var endTime = request.StartTime.AddMinutes(barber.BookingDurationMinutes);
+            bool isWrapped = endTime < request.StartTime;
 
             // Effective opening = max(shop, barber), Effective closing = min(shop, barber)
             var effectiveOpening = shopHours.OpeningTime > barberHours.OpeningTime
@@ -108,13 +117,13 @@ namespace Application.Features.Bookings.Commands.Create
             var effectiveClosing = shopHours.ClosingTime < barberHours.ClosingTime
                 ? shopHours.ClosingTime : barberHours.ClosingTime;
 
-            if (request.StartTime < effectiveOpening || endTime > effectiveClosing)
+            if (request.StartTime < effectiveOpening || endTime > effectiveClosing || isWrapped)
                 return Error.Validation("booking.slot.outside.hours",
                     "The selected time slot is outside working hours.");
 
             // Verify slot aligns to duration grid from opening
             var minutesFromOpen = (request.StartTime.ToTimeSpan() - effectiveOpening.ToTimeSpan()).TotalMinutes;
-            if (minutesFromOpen % barber.BookingDurationMinutes != 0)
+            if (minutesFromOpen < 0 || minutesFromOpen % barber.BookingDurationMinutes != 0)
                 return Error.Validation("booking.slot.invalid",
                     $"Time slots must align to {barber.BookingDurationMinutes}-minute intervals.");
 
