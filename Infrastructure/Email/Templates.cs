@@ -212,5 +212,125 @@ namespace Infrastructure.Email
             </body>
             </html>";
             }
+
+            public static string BookingInfoTemplate(string barberName, string customerName, string customerPhone, DateOnly bookingDate, TimeOnly startTime)
+            {
+                return $@"
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='UTF-8'>
+                <style>
+                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+                    .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
+                    .header {{ text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 20px; }}
+                    .header h1 {{ color: #007bff; margin: 0; }}
+                    .content {{ padding: 20px 0; }}
+                    .content p {{ color: #333; line-height: 1.6; }}
+                    .booking-details {{ background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                    .detail-row {{ display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef; }}
+                    .detail-row:last-child {{ border-bottom: none; }}
+                    .detail-label {{ font-weight: bold; color: #495057; }}
+                    .detail-value {{ color: #212529; }}
+                    .booking-date {{ background-color: #007bff; color: white; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0; font-size: 16px; }}
+                    .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h1>📅 New Booking Notification</h1>
+                    </div>
+                    <div class='content'>
+                        <p>Hello <strong>{barberName}</strong>,</p>
+                        <p>You have a new booking! Here are the details:</p>
+                        <div class='booking-details'>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Customer Name:</span>
+                                <span class='detail-value'>{customerName}</span>
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Contact Number:</span>
+                                <span class='detail-value'>{customerPhone}</span>
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Booking Date:</span>
+                                <span class='detail-value'>{bookingDate:dddd, MMMM dd, yyyy}</span>
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Start Time:</span>
+                                <span class='detail-value'>{startTime:hh:mm tt}</span>
+                            </div>
+                        </div>
+                        <p>Please make sure you're available at the scheduled time. If you have any issues, please contact the customer as soon as possible.</p>
+                    </div>
+                    <div class='footer'>
+                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            }
+
+            public static string BookingCancellationTemplate(string barberName, string customerName, string customerPhone, DateOnly bookingDate, TimeOnly startTime)
+            {
+                return $@"
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='UTF-8'>
+                <style>
+                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+                    .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
+                    .header {{ text-align: center; border-bottom: 2px solid #dc3545; padding-bottom: 20px; }}
+                    .header h1 {{ color: #dc3545; margin: 0; }}
+                    .content {{ padding: 20px 0; }}
+                    .content p {{ color: #333; line-height: 1.6; }}
+                    .booking-details {{ background-color: #f8f9fa; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                    .detail-row {{ display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef; }}
+                    .detail-row:last-child {{ border-bottom: none; }}
+                    .detail-label {{ font-weight: bold; color: #495057; }}
+                    .detail-value {{ color: #212529; }}
+                    .cancellation-notice {{ background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                    .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h1>❌ Booking Cancellation Notice</h1>
+                    </div>
+                    <div class='content'>
+                        <p>Hello <strong>{barberName}</strong>,</p>
+                        <p>A booking has been cancelled. Here are the details:</p>
+                        <div class='booking-details'>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Customer Name:</span>
+                                <span class='detail-value'>{customerName}</span>
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Contact Number:</span>
+                                <span class='detail-value'>{customerPhone}</span>
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Booking Date:</span>
+                                <span class='detail-value'>{bookingDate:dddd, MMMM dd, yyyy}</span>
+                            </div>
+                            <div class='detail-row'>
+                                <span class='detail-label'>Start Time:</span>
+                                <span class='detail-value'>{startTime:hh:mm tt}</span>
+                            </div>
+                        </div>
+                        <div class='cancellation-notice'>
+                            <p><strong>This time slot is now available</strong> and can be booked by other customers.</p>
+                        </div>
+                    </div>
+                    <div class='footer'>
+                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+            }
         }
 }

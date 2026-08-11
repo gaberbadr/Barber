@@ -1,4 +1,5 @@
 using Application.Features.Bookings.DTOs;
+using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
@@ -17,17 +18,20 @@ namespace Application.Features.Bookings.Commands.Create
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly TimeProvider _timeProvider;
+        private readonly IEmailSender _emailSender;
 
         public CreateBookingCommandHandler(
             IUnitOfWork unitOfWork,
             UserManager<ApplicationUser> userManager,
             IMapper mapper,
-            TimeProvider timeProvider)
+            TimeProvider timeProvider,
+            IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
             _timeProvider = timeProvider;
+            _emailSender = emailSender;
         }
 
         public async Task<ErrorOr<BookingDTO>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
@@ -243,6 +247,16 @@ namespace Application.Features.Bookings.Commands.Create
             dto.CustomerPhone = booking.CustomerPhoneSnapshot;
             dto.BarberName = barber.FullName;
             dto.Items = _mapper.Map<List<BookingItemDTO>>(items);
+
+            // 20. Send booking notification email to barber
+            await _emailSender.SendBookingInfoAsync(
+                barber.Email ?? string.Empty,
+                barber.FullName ?? "Barber",
+                request.FullName,
+                request.PhoneNumber,
+                request.BookingDate,
+                request.StartTime);
+
             return dto;
         }
     }

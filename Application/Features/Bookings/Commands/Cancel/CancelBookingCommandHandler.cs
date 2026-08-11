@@ -1,4 +1,5 @@
 using Application.Features.Bookings.DTOs;
+using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
@@ -16,17 +17,20 @@ namespace Application.Features.Bookings.Commands.Cancel
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly TimeProvider _timeProvider;
+        private readonly IEmailSender _emailSender;
 
         public CancelBookingCommandHandler(
             IUnitOfWork unitOfWork,
             UserManager<ApplicationUser> userManager,
             IMapper mapper,
-            TimeProvider timeProvider)
+            TimeProvider timeProvider,
+            IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
             _timeProvider = timeProvider;
+            _emailSender = emailSender;
         }
 
         public async Task<ErrorOr<BookingDTO>> Handle(CancelBookingCommand request, CancellationToken cancellationToken)
@@ -77,6 +81,15 @@ namespace Application.Features.Bookings.Commands.Cancel
 
             var customer = await _userManager.FindByIdAsync(booking.CustomerId);
             var barber = await _userManager.FindByIdAsync(booking.BarberId);
+
+            // Send cancellation notification email to barber
+            await _emailSender.SendBookingCancellationAsync(
+                barber?.Email ?? string.Empty,
+                barber?.FullName ?? "Barber",
+                customer?.FullName ?? "Customer",
+                booking.CustomerPhoneSnapshot ?? string.Empty,
+                booking.BookingDate,
+                booking.StartTime);
 
             var dto = _mapper.Map<BookingDTO>(booking);
             dto.CustomerName = customer?.FullName ?? "";

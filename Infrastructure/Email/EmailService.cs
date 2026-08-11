@@ -45,5 +45,17 @@ namespace Infrastructure.Email
             var htmlBody = Templates.OtpEmailTemplate(userName, otp, expiration);
             await _smtpEmailSender.SendEmailAsync(recipientEmail, "Your One-Time Password (OTP)", htmlBody);
         }
+
+        public async Task SendBookingInfoAsync(string barberEmail, string barberName, string customerName, string customerPhone, DateOnly bookingDate, TimeOnly startTime)
+        {
+            var htmlBody = Templates.BookingInfoTemplate(barberName, customerName, customerPhone, bookingDate, startTime);
+            await _smtpEmailSender.SendEmailAsync(barberEmail, "New Booking Notification", htmlBody);
+        }
+
+        public async Task SendBookingCancellationAsync(string barberEmail, string barberName, string customerName, string customerPhone, DateOnly bookingDate, TimeOnly startTime)
+        {
+            var htmlBody = Templates.BookingCancellationTemplate(barberName, customerName, customerPhone, bookingDate, startTime);
+            await _smtpEmailSender.SendEmailAsync(barberEmail, "Booking Cancellation Notice", htmlBody);
+        }
     }
 }
