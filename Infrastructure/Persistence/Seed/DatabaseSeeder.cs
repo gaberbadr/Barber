@@ -10,66 +10,8 @@ namespace Infrastructure.Persistence.Seed
 {
     public static class DatabaseSeeder
     {
-        public static async Task SeedAsync(
-            ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+        public static async Task SeedAsync(ApplicationDbContext context)
         {
-            // Ensure Barber role exists
-            if (!await roleManager.RoleExistsAsync("Barber"))
-                await roleManager.CreateAsync(new IdentityRole("Barber"));
-
-            if (!await roleManager.RoleExistsAsync("User"))
-                await roleManager.CreateAsync(new IdentityRole("User"));
-
-            // Seed barbers
-            if (!userManager.Users.Any(u => u.UserName!.StartsWith("barber")))
-            {
-                var barbers = new[]
-                {
-                    new { Name = "Ahmed Hassan", Email = "barber1@barbershop.com", Phone = "01000000001" },
-                    new { Name = "Mohamed Ali", Email = "barber2@barbershop.com", Phone = "01000000002" },
-                    new { Name = "Omar Ibrahim", Email = "barber3@barbershop.com", Phone = "01000000003" }
-                };
-
-                foreach (var b in barbers)
-                {
-                    var barber = new ApplicationUser
-                    {
-                        UserName = b.Email,
-                        Email = b.Email,
-                        FullName = b.Name,
-                        PhoneNumber = b.Phone,
-                        EmailConfirmed = true,
-                        IsActive = true,
-                        BookingDurationMinutes = 30,
-                        AcceptingBookings = true,
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    var result = await userManager.CreateAsync(barber, "Barber@123");
-                    if (result.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(barber, "Barber");
-
-                        // Add default working hours (Sat-Thu 9:00-22:00, Fri closed)
-                        for (int day = 0; day < 7; day++)
-                        {
-                            var dayOfWeek = (DayOfWeek)day;
-                            context.BarberWorkingHours.Add(new BarberWorkingHour
-                            {
-                                BarberId = barber.Id,
-                                DayOfWeek = dayOfWeek,
-                                OpeningTime = new TimeOnly(9, 0),
-                                ClosingTime = new TimeOnly(22, 0),
-                                IsClosed = dayOfWeek == DayOfWeek.Friday,
-                                CreatedAt = DateTime.UtcNow
-                            });
-                        }
-                    }
-                }
-            }
-
             // Seed services
             if (!context.Services.Any())
             {

@@ -50,7 +50,7 @@ try
     await context.Database.MigrateAsync();// Update-DataBase
     await DefaultRolesSeeder.SeedRolesAsync(userrole);
     await DefaultAdminSeeder.SeedAppUserAsync(usermanger, userrole);
-    await DatabaseSeeder.SeedAsync(context, usermanger, userrole);
+    await DatabaseSeeder.SeedAsync(context);
 }
 catch (Exception ex)
 {
@@ -63,3 +63,5 @@ app.UseApiMiddlewares();
 app.MapControllers();
 
 app.Run();
+
+// Add-Migration InitialCreate -OutputDir Persistence\Migrations
