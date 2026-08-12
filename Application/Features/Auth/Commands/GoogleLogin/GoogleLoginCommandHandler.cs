@@ -41,7 +41,7 @@ namespace Application.Features.Auth.Commands.GoogleLogin
                 var info = await _signInManager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
-                    return Error.Failure("auth.google.info.not.found", "External login info not found. Please complete Google login first.");
+                    return Error.Failure("auth.google.info.not.found", "معلومات تسجيل الدخول مش موجودة. يرجى تسجيل الدخول بحساب جوجل الأول.");
                 }
 
                 // Try to find user by Google login
@@ -53,7 +53,7 @@ namespace Application.Features.Auth.Commands.GoogleLogin
                     var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                     if (string.IsNullOrEmpty(email))
                     {
-                        return Error.Failure("auth.google.email.not.provided", "Email not provided by Google.");
+                        return Error.Failure("auth.google.email.not.provided", "جوجل مبعتتش البريد الإلكتروني.");
                     }
 
                     // Find user by email
@@ -71,7 +71,7 @@ namespace Application.Features.Auth.Commands.GoogleLogin
                         var createResult = await _userManager.CreateAsync(user);
                         if (!createResult.Succeeded)
                         {
-                            return Error.Failure("auth.google.user.creation.failed", "Failed to create user account.");
+                            return Error.Failure("auth.google.user.creation.failed", "فشل إنشاء حساب المستخدم.");
                         }
                     }
                     else if (!user.EmailConfirmed)
@@ -84,14 +84,14 @@ namespace Application.Features.Auth.Commands.GoogleLogin
                     var addLoginResult = await _userManager.AddLoginAsync(user, info);
                     if (!addLoginResult.Succeeded)
                     {
-                        return Error.Failure("auth.google.login.link.failed", "Failed to link Google account.");
+                        return Error.Failure("auth.google.login.link.failed", "فشل ربط الحساب بجوجل.");
                     }
                 }
 
                 // Check if user is active
                 if (!user.IsActive)
                 {
-                    return Error.Unauthorized("auth.user.blocked", "This account is blocked. Please contact support.");
+                    return Error.Unauthorized("auth.user.blocked", "حسابك موقوف. يرجى التواصل مع الدعم.");
                 }
 
                 // Generate tokens
@@ -101,7 +101,7 @@ namespace Application.Features.Auth.Commands.GoogleLogin
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Google login failed: {Message}", ex.Message);
-                return Error.Failure("auth.google.login.failed", $"Google login failed: {ex.Message}");
+                return Error.Failure("auth.google.login.failed", $"تسجيل الدخول بجوجل فشل: {ex.Message}");
             }
         }
 

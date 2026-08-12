@@ -7,7 +7,7 @@ namespace Application.Features.Auth.Commands.Logout
         public LogoutCommandValidator()
         {
             RuleFor(x => x.UserId)
-                .NotEmpty().WithMessage("User ID is required.");
+                .NotEmpty().WithMessage("رقم المستخدم مطلوب.");
         }
     }
 }

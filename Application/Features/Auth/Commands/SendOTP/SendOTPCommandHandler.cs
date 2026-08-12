@@ -37,14 +37,14 @@ namespace Application.Features.Auth.Commands.SendOTP
                     var result = await _userManager.CreateAsync(user);
                     if (!result.Succeeded)
                     {
-                        return Error.Failure("auth.user.creation.failed", "Failed to create user account.");
+                        return Error.Failure("auth.user.creation.failed", "فشل إنشاء حساب المستخدم.");
                     }
                 }
 
                 // Check if user is blocked
                 if (!user.IsActive)
                 {
-                    return Error.Failure("auth.user.blocked", "This account is blocked. Please contact support.");
+                    return Error.Failure("auth.user.blocked", "حسابك موقوف. يرجى التواصل مع الدعم.");
                 }
 
                 // Generate OTP
@@ -55,7 +55,7 @@ namespace Application.Features.Auth.Commands.SendOTP
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
                 {
-                    return Error.Failure("auth.otp.generation.failed", "Failed to generate OTP.");
+                    return Error.Failure("auth.otp.generation.failed", "فشل إنشاء كود التحقق.");
                 }
 
                 var userName = !string.IsNullOrWhiteSpace(user.FullName)
@@ -72,7 +72,7 @@ namespace Application.Features.Auth.Commands.SendOTP
             }
             catch (Exception ex)
             {
-                return Error.Failure("auth.otp.send.failed", $"Failed to send OTP: {ex.Message}");
+                return Error.Failure("auth.otp.send.failed", $"فشل إرسال كود التحقق: {ex.Message}");
             }
         }
     }

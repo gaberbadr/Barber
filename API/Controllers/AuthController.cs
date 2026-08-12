@@ -65,7 +65,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Verification code sent successfully." }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "تم إرسال كود التحقق بنجاح." }));
         }
 
         /// <summary>
@@ -108,10 +108,10 @@ namespace Zero.Controllers
         public IActionResult GoogleLogin([FromQuery] string returnUrl)
         {
             if (string.IsNullOrWhiteSpace(returnUrl))
-                return BadRequest("Return URL is required.");
+                return BadRequest("رابط العودة مطلوب.");
 
             if (!IsValidReturnUrl(returnUrl))
-                return BadRequest("Invalid return URL.");
+                return BadRequest("رابط العودة غير صحيح.");
 
             var redirectUrl = Url.Action(
                 nameof(GoogleCallback),"Auth",new { returnUrl });
@@ -131,7 +131,7 @@ namespace Zero.Controllers
         {
             if (string.IsNullOrWhiteSpace(returnUrl) || !IsValidReturnUrl(returnUrl))
             {
-                return BadRequest("Invalid return URL.");
+                return BadRequest("رابط العودة غير صحيح.");
             }
 
             var authenticateResult =
@@ -140,7 +140,7 @@ namespace Zero.Controllers
             if (!authenticateResult.Succeeded)
             {
                 return Redirect(
-                    $"{returnUrl}?error={Uri.EscapeDataString("Google authentication failed.")}");
+                    $"{returnUrl}?error={Uri.EscapeDataString("تسجيل الدخول بجوجل فشل.")}");
             }
 
             var command = new GoogleLoginCommand
@@ -230,7 +230,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Refresh token revoked successfully." }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "تم إلغاء توكن التجديد بنجاح." }));
         }
 
         // Logs out the authenticated user by revoking all refresh tokens.
@@ -250,7 +250,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Logout successful." }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "تم تسجيل الخروج بنجاح." }));
         }
 
         /// <summary>
@@ -270,12 +270,12 @@ namespace Zero.Controllers
         {
             if (!_currentUser.IsAuthenticated || string.IsNullOrEmpty(_currentUser.UserId))
             {
-                return Unauthorized(new { message = "User must be authenticated." });
+                return Unauthorized(new { message = "لازم تسجل دخول الأول." });
             }
 
             if (request?.File == null || request.File.Length == 0)
             {
-                return BadRequest(new { message = "No file was uploaded." });
+                return BadRequest(new { message = "مفيش ملف اترفع." });
             }
 
             var command = new UpdateProfilePictureCommand
@@ -309,7 +309,7 @@ namespace Zero.Controllers
         {
             if (!_currentUser.IsAuthenticated || string.IsNullOrEmpty(_currentUser.UserId))
             {
-                return Unauthorized(new { message = "User must be authenticated." });
+                return Unauthorized(new { message = "لازم تسجل دخول الأول." });
             }
 
             var command = new DeleteProfilePictureCommand
@@ -324,7 +324,7 @@ namespace Zero.Controllers
                 return HandleErrorResult(result.Errors);
             }
 
-            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Profile picture deleted successfully." }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "تم مسح الصورة الشخصية بنجاح." }));
         }
 
 

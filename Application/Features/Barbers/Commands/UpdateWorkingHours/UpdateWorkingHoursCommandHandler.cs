@@ -33,11 +33,11 @@ namespace Application.Features.Barbers.Commands.UpdateWorkingHours
         {
             var barber = await _userManager.FindByIdAsync(request.BarberId);
             if (barber == null)
-                return Error.NotFound("barber.not.found", "Barber not found.");
+                return Error.NotFound("barber.not.found", "الحلاق ده مش موجود.");
 
             var isBarber = await _userManager.IsInRoleAsync(barber, "Barber");
             if (!isBarber)
-                return Error.Forbidden("barber.not.barber", "User is not a barber.");
+                return Error.Forbidden("barber.not.barber", "المستخدم ده مش حلاق.");
 
             var workingHoursRepo = _unitOfWork.Repository<BarberWorkingHour, int>();
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
@@ -64,7 +64,7 @@ namespace Application.Features.Barbers.Commands.UpdateWorkingHours
                     if (reqHour.OpeningTime < shopHour.OpeningTime || reqHour.ClosingTime > shopHour.ClosingTime)
                     {
                         return Error.Validation("workinghours.outside.shop", 
-                            $"You cannot set working hours outside the shop's global hours ({shopHour.OpeningTime} - {shopHour.ClosingTime}) for {reqHour.DayOfWeek}. Please contact the admin.");
+                            $"مينفعش تحدد مواعيد عمل بره مواعيد المحل الأساسية ({shopHour.OpeningTime} - {shopHour.ClosingTime}) ليوم {reqHour.DayOfWeek}. يرجى التواصل مع الإدارة.");
                     }
                 }
 
@@ -83,7 +83,7 @@ namespace Application.Features.Barbers.Commands.UpdateWorkingHours
                     var hasBookings = upcomingBookings.Any(b => b.BookingDate.DayOfWeek == reqHour.DayOfWeek);
                     if (hasBookings)
                     {
-                        return Error.Conflict("workinghours.conflict", $"Cannot change working hours for {reqHour.DayOfWeek} because there are upcoming bookings on this day.");
+                        return Error.Conflict("workinghours.conflict", $"مينفعش تغيّر مواعيد العمل ليوم {reqHour.DayOfWeek} عشان فيه حجوزات جاية في اليوم ده.");
                     }
                 }
             }

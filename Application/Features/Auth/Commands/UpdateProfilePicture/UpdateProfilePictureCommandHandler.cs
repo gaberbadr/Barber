@@ -33,13 +33,13 @@ namespace Application.Features.Auth.Commands.UpdateProfilePicture
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
             {
-                return Error.NotFound("auth.user.not.found", "User not found.");
+                return Error.NotFound("auth.user.not.found", "المستخدم ده مش موجود.");
             }
 
             // Validate file exists
             if (request.ProfilePictureFile == null || request.ProfilePictureFile.Length == 0)
             {
-                return Error.Validation("image.empty", "No file was provided.");
+                return Error.Validation("image.empty", "مفيش ملف اتبعت.");
             }
 
             // Store the old image URL for potential cleanup
@@ -67,7 +67,7 @@ namespace Application.Features.Auth.Commands.UpdateProfilePicture
                     {
                         // If database update fails, attempt to delete the uploaded image
                         await _cloudinaryService.DeleteImageAsync(uploadResult.Value.PublicId);
-                        return Error.Failure("image.update.failed", "Failed to update user profile picture.");
+                        return Error.Failure("image.update.failed", "فشل تحديث صورة الملف الشخصي.");
                     }
 
                     // Delete old image from Cloudinary if it existed
@@ -84,13 +84,13 @@ namespace Application.Features.Auth.Commands.UpdateProfilePicture
                     return new ProfilePictureResponseDTO
                     {
                         ProfilePictureUrl = user.ProfilePictureUrl,
-                        Message = "Profile picture updated successfully."
+                        Message = "تم تحديث صورة الملف الشخصي بنجاح."
                     };
                 }
             }
             catch (Exception ex)
             {
-                return Error.Failure("image.upload.exception", $"An error occurred while uploading: {ex.Message}");
+                return Error.Failure("image.upload.exception", $"حصل مشكلة أثناء الرفع: {ex.Message}");
             }
         }
 

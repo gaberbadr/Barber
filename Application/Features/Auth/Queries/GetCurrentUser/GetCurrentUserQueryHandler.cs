@@ -24,7 +24,7 @@ namespace Application.Features.Auth.Queries.GetCurrentUser
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
             {
-                return Error.NotFound("auth.user.not.found", "User not found.");
+                return Error.NotFound("auth.user.not.found", "المستخدم ده مش موجود.");
             }
 
             var userDto = _mapper.Map<UserDTO>(user);

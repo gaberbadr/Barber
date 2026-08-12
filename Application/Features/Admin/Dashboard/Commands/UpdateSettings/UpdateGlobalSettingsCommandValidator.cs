@@ -7,12 +7,12 @@ namespace Application.Features.Admin.Dashboard.Commands.UpdateSettings
         public UpdateGlobalSettingsCommandValidator()
         {
             RuleFor(x => x.MaximumBookingAdvanceDays)
-                .GreaterThan(0).WithMessage("Maximum booking advance days must be greater than 0.")
-                .LessThanOrEqualTo(365).WithMessage("Maximum booking advance days cannot exceed 365.");
+                .GreaterThan(0).WithMessage("أقصى عدد أيام للحجز لازم يكون أكتر من صفر.")
+                .LessThanOrEqualTo(365).WithMessage("أقصى عدد أيام للحجز مينفعش يعدي 365 يوم.");
 
             RuleFor(x => x.CancellationWindowHours)
-                .GreaterThanOrEqualTo(0).WithMessage("Cancellation window hours must be 0 or greater.")
-                .LessThanOrEqualTo(168).WithMessage("Cancellation window hours cannot exceed 168 (7 days).");
+                .GreaterThanOrEqualTo(0).WithMessage("ساعات فترة الإلغاء لازم تكون صفر أو أكتر.")
+                .LessThanOrEqualTo(168).WithMessage("ساعات فترة الإلغاء مينفعش تعدي 168 ساعة (7 أيام).");
         }
     }
 }

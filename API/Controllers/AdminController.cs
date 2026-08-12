@@ -142,7 +142,7 @@ namespace API.Controllers
                 Block = true
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(ApiResponse<object>.SuccessResponse(new { message = "User blocked successfully." }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "تم حظر المستخدم بنجاح." }));
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace API.Controllers
                 Block = false
             });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(ApiResponse<object>.SuccessResponse(new { message = "User unblocked successfully." }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "تم إلغاء حظر المستخدم بنجاح." }));
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new DeleteCouponCommand { CouponId = id });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Coupon deleted successfully." }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "تم مسح كود الخصم بنجاح." }));
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new RemoveBarberCommand { BarberId = id });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Barber removed successfully." }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "تم مسح الحلاق بنجاح." }));
         }
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace API.Controllers
         {
             var result = await _mediator.Send(new DeleteServiceCommand { ServiceId = id });
             if (result.IsError) return HandleErrorResult(result.Errors);
-            return Ok(ApiResponse<object>.SuccessResponse(new { message = "Service deleted successfully." }));
+            return Ok(ApiResponse<object>.SuccessResponse(new { message = "تم مسح الخدمة بنجاح." }));
         }
     }
 }

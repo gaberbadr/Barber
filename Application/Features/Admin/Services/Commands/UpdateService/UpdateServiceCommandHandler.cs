@@ -27,7 +27,7 @@ namespace Application.Features.Admin.Services.Commands.UpdateService
             var service = await serviceRepo.GetByIdAsync(request.Id);
             if (service == null)
             {
-                return Error.NotFound("service.not.found", "Service not found.");
+                return Error.NotFound("service.not.found", "الخدمة دي مش موجودة.");
             }
 
             service.Name = request.Name;

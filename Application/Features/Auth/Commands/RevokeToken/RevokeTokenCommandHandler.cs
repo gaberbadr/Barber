@@ -24,7 +24,7 @@ namespace Application.Features.Auth.Commands.RevokeToken
 
             if (tokenEntry == null)
             {
-                return Error.NotFound("auth.token.not.found", "Refresh token not found.");
+                return Error.NotFound("auth.token.not.found", "التوكن ده مش موجود.");
             }
 
             tokenEntry.RevokedAt = DateTime.UtcNow;

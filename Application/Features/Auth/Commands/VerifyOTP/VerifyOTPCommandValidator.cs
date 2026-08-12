@@ -7,12 +7,12 @@ namespace Application.Features.Auth.Commands.VerifyOTP
         public VerifyOTPCommandValidator()
         {
             RuleFor(x => x.Email)
-                .NotEmpty().WithMessage("Email is required.")
-                .EmailAddress().WithMessage("Email format is invalid.");
+                .NotEmpty().WithMessage("البريد الإلكتروني مطلوب.")
+                .EmailAddress().WithMessage("صيغة البريد الإلكتروني غير صحيحة.");
 
             RuleFor(x => x.Code)
-                .NotEmpty().WithMessage("Verification code is required.")
-                .Length(6).WithMessage("Verification code must be 6 digits.");
+                .NotEmpty().WithMessage("كود التحقق مطلوب.")
+                .Length(6).WithMessage("كود التحقق لازم يكون 6 أرقام.");
         }
     }
 }

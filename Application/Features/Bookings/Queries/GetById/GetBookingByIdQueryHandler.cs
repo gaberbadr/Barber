@@ -31,19 +31,19 @@ namespace Application.Features.Bookings.Queries.GetById
             var booking = await bookingRepo.GetAsync(request.BookingId);
 
             if (booking == null)
-                return Error.NotFound("booking.not.found", "Booking not found.");
+                return Error.NotFound("booking.not.found", "الحجز ده مش موجود.");
 
             // Only the customer, the barber, or an admin can view the booking
             var requestingUser = await _userManager.FindByIdAsync(request.RequestingUserId);
             if (requestingUser == null)
-                return Error.NotFound("user.not.found", "User not found.");
+                return Error.NotFound("user.not.found", "المستخدم ده مش موجود.");
 
             var isAdmin = await _userManager.IsInRoleAsync(requestingUser, "Admin");
             var isCustomer = booking.CustomerId == request.RequestingUserId;
             var isBarber = booking.BarberId == request.RequestingUserId;
 
             if (!isCustomer && !isBarber && !isAdmin)
-                return Error.Forbidden("booking.access.denied", "You do not have permission to view this booking.");
+                return Error.Forbidden("booking.access.denied", "مش مسموح لك تشوف الحجز ده.");
 
             var customer = await _userManager.FindByIdAsync(booking.CustomerId);
             var barber = await _userManager.FindByIdAsync(booking.BarberId);

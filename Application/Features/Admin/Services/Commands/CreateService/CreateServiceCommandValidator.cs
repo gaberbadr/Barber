@@ -7,14 +7,14 @@ namespace Application.Features.Admin.Services.Commands.CreateService
         public CreateServiceCommandValidator()
         {
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Name is required.")
-                .MaximumLength(100).WithMessage("Name must not exceed 100 characters.");
+                .NotEmpty().WithMessage("الاسم مطلوب.")
+                .MaximumLength(100).WithMessage("الاسم مينفعش يعدي 100 حرف.");
 
             RuleFor(x => x.Description)
-                .MaximumLength(500).WithMessage("Description must not exceed 500 characters.");
+                .MaximumLength(500).WithMessage("الوصف مينفعش يعدي 500 حرف.");
 
             RuleFor(x => x.Price)
-                .GreaterThanOrEqualTo(0).WithMessage("Price must be greater than or equal to 0.");
+                .GreaterThanOrEqualTo(0).WithMessage("السعر لازم يكون صفر أو أكتر.");
         }
     }
 }

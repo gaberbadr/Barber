@@ -41,7 +41,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllBookings
                 {
                     return Error.Validation(
                         code: "Booking.InvalidStatus",
-                        description: $"Invalid booking status: {request.Status}");
+                        description: $"حالة الحجز غير صحيحة: {request.Status}");
                 }
 
                 status = parsedStatus;

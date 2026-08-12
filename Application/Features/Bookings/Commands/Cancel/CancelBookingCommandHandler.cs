@@ -39,27 +39,27 @@ namespace Application.Features.Bookings.Commands.Cancel
             var booking = await bookingRepo.GetAsync(request.BookingId);
 
             if (booking == null)
-                return Error.NotFound("booking.not.found", "Booking not found.");
+                return Error.NotFound("booking.not.found", "الحجز ده مش موجود.");
 
             // Verify the user cancelling is the customer or an admin
             var canceller = await _userManager.FindByIdAsync(request.CancelledByUserId);
             if (canceller == null)
-                return Error.NotFound("booking.canceller.not.found", "User not found.");
+                return Error.NotFound("booking.canceller.not.found", "المستخدم ده مش موجود.");
 
             var isAdmin = await _userManager.IsInRoleAsync(canceller, "Admin");
             var isOwner = booking.CustomerId == request.CancelledByUserId;
 
             if (!isOwner && !isAdmin)
-                return Error.Forbidden("booking.not.authorized", "You can only cancel your own bookings.");
+                return Error.Forbidden("booking.not.authorized", "مينفعش تلغي حجوزات حد تاني.");
 
             if (booking.Status == BookingStatus.Cancelled)
-                return Error.Validation("booking.already.cancelled", "This booking is already cancelled.");
+                return Error.Validation("booking.already.cancelled", "الحجز ده ملغي بالفعل.");
 
             // Get global settings
             var settingsRepo = _unitOfWork.Repository<GlobalBookingSettings, int>();
             var settings = (await settingsRepo.GetAllAsync()).FirstOrDefault();
             if (settings == null)
-                return Error.Failure("booking.settings.missing", "Booking settings not configured.");
+                return Error.Failure("booking.settings.missing", "إعدادات الحجز مش مظبوطة.");
 
             // Check cancellation window (16 hours before appointment)
             var appointmentDateTime = booking.BookingDate.ToDateTime(booking.StartTime);
@@ -68,7 +68,7 @@ namespace Application.Features.Bookings.Commands.Cancel
 
             if (localNow > cancellationDeadline && !isAdmin)
                 return Error.Validation("booking.cancellation.window.passed",
-                    $"Bookings can only be cancelled at least {settings.CancellationWindowHours} hours before the appointment.");
+                    $"تقدر تلغي الحجز بس قبل الميعاد بـ {settings.CancellationWindowHours} ساعات على الأقل.");
 
             var utcNow = _timeProvider.GetUtcNow().DateTime;
             booking.Status = BookingStatus.Cancelled;

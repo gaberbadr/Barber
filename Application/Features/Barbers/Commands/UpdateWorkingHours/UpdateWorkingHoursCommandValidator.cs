@@ -7,14 +7,14 @@ namespace Application.Features.Barbers.Commands.UpdateWorkingHours
         public UpdateWorkingHoursCommandValidator()
         {
             RuleFor(x => x.WorkingHours)
-                .NotEmpty().WithMessage("At least one working hour entry is required.");
+                .NotEmpty().WithMessage("لازم تدخل موعد عمل واحد على الأقل.");
 
             RuleForEach(x => x.WorkingHours).ChildRules(wh =>
             {
                 wh.RuleFor(w => w.OpeningTime)
                     .LessThan(w => w.ClosingTime)
                     .When(w => !w.IsClosed)
-                    .WithMessage("Opening time must be before closing time.");
+                    .WithMessage("وقت الفتح لازم يكون قبل وقت القفل.");
             });
         }
     }

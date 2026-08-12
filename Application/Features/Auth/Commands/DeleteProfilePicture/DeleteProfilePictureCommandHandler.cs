@@ -28,13 +28,13 @@ namespace Application.Features.Auth.Commands.DeleteProfilePicture
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
             {
-                return Error.NotFound("auth.user.not.found", "User not found.");
+                return Error.NotFound("auth.user.not.found", "المستخدم ده مش موجود.");
             }
 
             // Check if user has a profile picture
             if (string.IsNullOrEmpty(user.ProfilePictureUrl))
             {
-                return Error.NotFound("image.not.found", "User does not have a profile picture.");
+                return Error.NotFound("image.not.found", "المستخدم معندوش صورة شخصية.");
             }
 
             try
@@ -52,14 +52,14 @@ namespace Application.Features.Auth.Commands.DeleteProfilePicture
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
                 {
-                    return Error.Failure("image.delete.failed", "Failed to remove profile picture.");
+                    return Error.Failure("image.delete.failed", "فشل مسح الصورة الشخصية.");
                 }
 
                 return Result.Success;
             }
             catch (Exception ex)
             {
-                return Error.Failure("image.delete.exception", $"An error occurred: {ex.Message}");
+                return Error.Failure("image.delete.exception", $"حصل مشكلة: {ex.Message}");
             }
         }
 

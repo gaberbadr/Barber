@@ -33,20 +33,20 @@ namespace Application.Features.Auth.Commands.RefreshToken
 
             if (tokenEntry == null || !tokenEntry.IsActive)
             {
-                return Error.Unauthorized("auth.refresh.token.invalid", "Invalid refresh token.");
+                return Error.Unauthorized("auth.refresh.token.invalid", "توكن التجديد غير صحيح.");
             }
 
             // Find user
             var user = await _userManager.FindByIdAsync(tokenEntry.UserId);
             if (user == null)
             {
-                return Error.NotFound("auth.user.not.found", "User not found.");
+                return Error.NotFound("auth.user.not.found", "المستخدم ده مش موجود.");
             }
 
             // Check if user is active
             if (!user.IsActive)
             {
-                return Error.Unauthorized("auth.user.blocked", "This account is blocked. Please contact support.");
+                return Error.Unauthorized("auth.user.blocked", "حسابك موقوف. يرجى التواصل مع الدعم.");
             }
 
             // Revoke old refresh token

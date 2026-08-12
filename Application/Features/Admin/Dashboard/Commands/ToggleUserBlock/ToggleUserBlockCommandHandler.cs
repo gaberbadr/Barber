@@ -19,7 +19,7 @@ namespace Application.Features.Admin.Dashboard.Commands.ToggleUserBlock
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
-                return Error.NotFound("user.not.found", "User not found.");
+                return Error.NotFound("user.not.found", "المستخدم ده مش موجود.");
 
             user.IsActive = !request.Block;
             user.UpdatedAt = DateTime.UtcNow;

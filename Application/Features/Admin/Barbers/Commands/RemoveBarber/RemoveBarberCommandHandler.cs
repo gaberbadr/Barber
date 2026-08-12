@@ -25,11 +25,11 @@ namespace Application.Features.Admin.Barbers.Commands.RemoveBarber
         {
             var barber = await _userManager.FindByIdAsync(request.BarberId);
             if (barber == null)
-                return Error.NotFound("barber.not.found", "Barber not found.");
+                return Error.NotFound("barber.not.found", "الحلاق ده مش موجود.");
 
             var isBarber = await _userManager.IsInRoleAsync(barber, "Barber");
             if (!isBarber)
-                return Error.Forbidden("barber.not.barber", "User is not a barber.");
+                return Error.Forbidden("barber.not.barber", "المستخدم ده مش حلاق.");
 
             // Check for active/upcoming bookings
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
@@ -42,7 +42,7 @@ namespace Application.Features.Admin.Barbers.Commands.RemoveBarber
             {
                 var count = upcomingBookings.Count();
                 return Error.Conflict("barber.has.upcoming.bookings",
-                    $"Cannot remove barber with {count} upcoming bookings. Please cancel or complete them first.");
+                    $"مينفعش تحذف حلاق عنده {count} حجوزات جاية. يرجى إلغائها أو إتمامها الأول.");
             }
 
             // Remove Barber role

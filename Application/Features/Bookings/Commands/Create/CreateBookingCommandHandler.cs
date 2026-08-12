@@ -39,58 +39,58 @@ namespace Application.Features.Bookings.Commands.Create
             // 1. Verify customer exists and is active
             var customer = await _userManager.FindByIdAsync(request.CustomerId);
             if (customer == null)
-                return Error.NotFound("booking.customer.not.found", "Customer not found.");
+                return Error.NotFound("booking.customer.not.found", "العميل مش موجود.");
 
             if (!customer.IsActive)
-                return Error.Failure("booking.customer.blocked", "Your account is blocked. Please contact support.");
+                return Error.Failure("booking.customer.blocked", "حسابك موقوف. يرجى التواصل مع الدعم.");
 
             // 2. Validate FullName and PhoneNumber provided by customer
             if (string.IsNullOrWhiteSpace(request.FullName))
-                return Error.Validation("booking.fullname.required", "Full name is required to make a booking.");
+                return Error.Validation("booking.fullname.required", "الاسم بالكامل مطلوب عشان تحجز.");
 
             if (string.IsNullOrWhiteSpace(request.PhoneNumber))
-                return Error.Validation("booking.phone.required", "Phone number is required to make a booking.");
+                return Error.Validation("booking.phone.required", "رقم الموبايل مطلوب عشان تحجز.");
 
             // 3. Verify barber exists, is active, and is a Barber
             var barber = await _userManager.FindByIdAsync(request.BarberId);
             if (barber == null)
-                return Error.NotFound("booking.barber.not.found", "Barber not found.");
+                return Error.NotFound("booking.barber.not.found", "الحلاق ده مش موجود.");
 
             if (!barber.IsActive)
-                return Error.Failure("booking.barber.inactive", "This barber is currently inactive.");
+                return Error.Failure("booking.barber.inactive", "الحلاق ده غير مفعل دلوقتي.");
 
             var isBarber = await _userManager.IsInRoleAsync(barber, "Barber");
             if (!isBarber)
-                return Error.Validation("booking.barber.not.barber", "The selected user is not a barber.");
+                return Error.Validation("booking.barber.not.barber", "المستخدم اللي اخترته مش حلاق.");
 
             // 4. Verify barber accepts bookings
             if (!barber.AcceptingBookings)
-                return Error.Failure("booking.barber.not.accepting", "This barber is not currently accepting bookings.");
+                return Error.Failure("booking.barber.not.accepting", "الحلاق ده مش بيستقبل حجوزات دلوقتي.");
 
             // 5. Get global settings
             var settingsRepo = _unitOfWork.Repository<GlobalBookingSettings, int>();
             var settings = (await settingsRepo.GetAllAsync()).FirstOrDefault();
             if (settings == null)
-                return Error.Failure("booking.settings.missing", "Booking settings not configured.");
+                return Error.Failure("booking.settings.missing", "إعدادات الحجز مش مظبوطة.");
 
             // 6. Verify date is not past and within advance booking window
             var nowDateTime = _timeProvider.GetLocalNow().DateTime;
             var today = DateOnly.FromDateTime(nowDateTime);
             
             if (request.BookingDate < today)
-                return Error.Validation("booking.date.past", "Cannot book in the past.");
+                return Error.Validation("booking.date.past", "مينفعش تحجز في الماضي.");
                 
             if (request.BookingDate == today)
             {
                 var nowTime = TimeOnly.FromDateTime(nowDateTime);
                 if (request.StartTime < nowTime)
-                    return Error.Validation("booking.time.past", "Cannot book a time slot in the past.");
+                    return Error.Validation("booking.time.past", "مينفعش تحجز ميعاد فات.");
             }
 
             var maxDate = today.AddDays(settings.MaximumBookingAdvanceDays);
             if (request.BookingDate > maxDate)
                 return Error.Validation("booking.date.too.far",
-                    $"Bookings can only be made up to {settings.MaximumBookingAdvanceDays} days in advance.");
+                    $"الحجز متاح لحد {settings.MaximumBookingAdvanceDays} أيام قدام بس.");
 
             // 7. Verify shop is open on this day
             var shopHoursRepo = _unitOfWork.Repository<ShopWorkingHour, int>();
@@ -98,7 +98,7 @@ namespace Application.Features.Bookings.Commands.Create
                 s => s.DayOfWeek == request.BookingDate.DayOfWeek);
 
             if (shopHours == null || shopHours.IsClosed)
-                return Error.Validation("booking.shop.closed", "The shop is closed on this day.");
+                return Error.Validation("booking.shop.closed", "المحل قافل في اليوم ده.");
 
             // 8. Verify barber is working on this day
             var barberHoursRepo = _unitOfWork.Repository<BarberWorkingHour, int>();
@@ -106,7 +106,7 @@ namespace Application.Features.Bookings.Commands.Create
                 b => b.BarberId == request.BarberId && b.DayOfWeek == request.BookingDate.DayOfWeek);
 
             if (barberHours == null || barberHours.IsClosed)
-                return Error.Validation("booking.barber.not.working", "The barber is not working on this day.");
+                return Error.Validation("booking.barber.not.working", "الحلاق مش شغال في اليوم ده.");
 
             var endTime = request.StartTime.AddMinutes(barber.BookingDurationMinutes);
             bool isWrapped = endTime < request.StartTime;
@@ -119,13 +119,13 @@ namespace Application.Features.Bookings.Commands.Create
 
             if (request.StartTime < effectiveOpening || endTime > effectiveClosing || isWrapped)
                 return Error.Validation("booking.slot.outside.hours",
-                    "The selected time slot is outside working hours.");
+                    "الميعاد اللي اخترته بره مواعيد العمل.");
 
             // Verify slot aligns to duration grid from opening
             var minutesFromOpen = (request.StartTime.ToTimeSpan() - effectiveOpening.ToTimeSpan()).TotalMinutes;
             if (minutesFromOpen < 0 || minutesFromOpen % barber.BookingDurationMinutes != 0)
                 return Error.Validation("booking.slot.invalid",
-                    $"Time slots must align to {barber.BookingDurationMinutes}-minute intervals.");
+                    $"المواعيد لازم تكون متقسمة لفترات مدتها {barber.BookingDurationMinutes} دقيقة.");
 
             // 10. Check for overlapping confirmed bookings (concurrency-safe check)
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
@@ -137,7 +137,7 @@ namespace Application.Features.Bookings.Commands.Create
                 b.EndTime > request.StartTime);
 
             if (overlapping != null)
-                return Error.Conflict("booking.slot.unavailable", "This time slot is already booked.");
+                return Error.Conflict("booking.slot.unavailable", "الميعاد ده محجوز قبل كده.");
 
             // 11. Check user daily booking rule
             var existingUserBooking = await bookingRepo.FindFirstAsync(b =>
@@ -146,7 +146,7 @@ namespace Application.Features.Bookings.Commands.Create
                 b.Status == BookingStatus.Confirmed);
 
             if (existingUserBooking != null)
-                return Error.Conflict("booking.daily.limit", "You already have a confirmed booking for this day.");
+                return Error.Conflict("booking.daily.limit", "إنت عندك حجز مؤكد في اليوم ده بالفعل.");
 
             // 12. Validate selected services
             var serviceRepo = _unitOfWork.Repository<Service, int>();
@@ -156,7 +156,7 @@ namespace Application.Features.Bookings.Commands.Create
                 var service = await serviceRepo.GetAsync(serviceId);
                 if (service == null || !service.IsActive)
                     return Error.Validation("booking.service.invalid",
-                        $"Service with ID {serviceId} is not available.");
+                        $"الخدمة رقم {serviceId} مش متاحة.");
                 services.Add(service);
             }
 
@@ -177,14 +177,14 @@ namespace Application.Features.Bookings.Commands.Create
                     !c.IsDeleted);
 
                 if (coupon == null)
-                    return Error.Validation("booking.coupon.invalid", "Invalid coupon code.");
+                    return Error.Validation("booking.coupon.invalid", "كود الخصم غير صحيح.");
 
                 var now = _timeProvider.GetLocalNow().DateTime;
                 if (now < coupon.StartDate || now > coupon.ExpiryDate)
-                    return Error.Validation("booking.coupon.expired", "This coupon has expired.");
+                    return Error.Validation("booking.coupon.expired", "كود الخصم ده منتهي الصلاحية.");
 
                 if (coupon.UsageLimit.HasValue && coupon.TimesUsed >= coupon.UsageLimit.Value)
-                    return Error.Validation("booking.coupon.limit.reached", "This coupon has reached its usage limit.");
+                    return Error.Validation("booking.coupon.limit.reached", "كود الخصم ده وصل للحد الأقصى للاستخدام.");
 
                 discount = subTotal * (coupon.DiscountPercentage / 100m);
                 couponCodeSnapshot = coupon.Code;
@@ -245,7 +245,7 @@ namespace Application.Features.Bookings.Commands.Create
             if (!updateResult.Succeeded)
             {
                 return Error.Failure("booking.customer.update.failed",
-                    "Failed to update customer information. Booking created but profile not updated.");
+                    "فشل تحديث بيانات العميل. الحجز تم بس الملف الشخصي متحدثش.");
             }
 
             await _unitOfWork.CompleteAsync();

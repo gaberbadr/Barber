@@ -21,7 +21,7 @@ namespace Application.Features.Admin.Coupons.Commands.DeleteCoupon
 
             var coupon = await couponRepo.GetByIdAsync(request.CouponId);
             if (coupon == null)
-                return Error.NotFound("coupon.not.found", "Coupon not found.");
+                return Error.NotFound("coupon.not.found", "كود الخصم ده مش موجود.");
 
             // Bookings with CouponId will be set to NULL due to OnDelete(DeleteBehavior.SetNull)
             // CouponCodeSnapshot is preserved for historical booking records

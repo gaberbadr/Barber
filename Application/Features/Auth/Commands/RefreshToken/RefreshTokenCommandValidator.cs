@@ -7,7 +7,7 @@ namespace Application.Features.Auth.Commands.RefreshToken
         public RefreshTokenCommandValidator()
         {
             RuleFor(x => x.RefreshToken)
-                .NotEmpty().WithMessage("Refresh token is required.");
+                .NotEmpty().WithMessage("توكن التجديد مطلوب.");
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetSettings
             var settings = (await repo.GetAllAsync()).FirstOrDefault();
 
             if (settings == null)
-                return Error.NotFound("settings.not.found", "Global settings not configured.");
+                return Error.NotFound("settings.not.found", "الإعدادات العامة مش مظبوطة.");
 
             return new GlobalSettingsDTO
             {

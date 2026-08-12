@@ -81,7 +81,7 @@ namespace Application.Features.Admin.Barbers.Commands.AddBarber
             // Check if user is already a barber
             var isAlreadyBarber = await _userManager.IsInRoleAsync(user, "Barber");
             if (isAlreadyBarber)
-                return Error.Conflict("barber.already.exists", "This user is already registered as a barber.");
+                return Error.Conflict("barber.already.exists", "المستخدم ده متسجل كحلاق بالفعل.");
 
             // Update user profile with barber information
             user.FullName = request.FullName;

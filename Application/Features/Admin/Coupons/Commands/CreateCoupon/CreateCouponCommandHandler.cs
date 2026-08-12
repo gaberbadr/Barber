@@ -26,7 +26,7 @@ namespace Application.Features.Admin.Coupons.Commands.CreateCoupon
             // Check for duplicate coupon code
             var existingCoupon = await couponRepo.FindOneAsync(c => c.Code == request.Code.ToUpper());
             if (existingCoupon != null)
-                return Error.Conflict("coupon.code.exists", "A coupon with this code already exists.");
+                return Error.Conflict("coupon.code.exists", "فيه كود خصم بنفس الاسم ده موجود قبل كده.");
 
             var coupon = new Coupon
             {

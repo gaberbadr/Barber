@@ -10,27 +10,27 @@ namespace Application.Features.Auth.Commands.UpdateProfilePicture
         public UpdateProfilePictureCommandValidator()
         {
             RuleFor(x => x.UserId)
-                .NotEmpty().WithMessage("User ID is required.");
+                .NotEmpty().WithMessage("رقم المستخدم مطلوب.");
 
             RuleFor(x => x.ProfilePictureFile)
-                .NotNull().WithMessage("Profile picture file is required.");
+                .NotNull().WithMessage("ملف الصورة الشخصية مطلوب.");
 
             When(x => x.ProfilePictureFile != null, () =>
             {
                 RuleFor(x => x.ProfilePictureFile!.Length)
                     .LessThanOrEqualTo(MaxFileSizeBytes)
-                    .WithMessage($"File size must not exceed 5 MB.");
+                    .WithMessage($"حجم الملف مينفعش يعدي 5 ميجا.");
 
                 RuleFor(x => x.ProfilePictureFile!.FileName)
                     .Must(fileName => AllowedExtensions.Any(ext => 
                         fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
-                    .WithMessage("File must be a valid image format (.jpg, .jpeg, .png, .gif, .webp).");
+                    .WithMessage("الملف لازم يكون بصيغة صورة صحيحة (.jpg, .jpeg, .png, .gif, .webp).");
 
                 RuleFor(x => x.ProfilePictureFile!.ContentType)
                     .Must(contentType => contentType != null && 
                         (contentType.StartsWith("image/") || 
                          contentType == "application/octet-stream"))
-                    .WithMessage("File must be a valid image.");
+                    .WithMessage("الملف لازم يكون صورة صحيحة.");
             });
         }
     }

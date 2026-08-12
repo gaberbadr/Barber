@@ -7,7 +7,7 @@ namespace Application.Features.Auth.Commands.DeleteProfilePicture
         public DeleteProfilePictureCommandValidator()
         {
             RuleFor(x => x.UserId)
-                .NotEmpty().WithMessage("User ID is required.");
+                .NotEmpty().WithMessage("رقم المستخدم مطلوب.");
         }
     }
 }

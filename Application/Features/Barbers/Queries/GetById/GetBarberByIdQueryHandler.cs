@@ -29,11 +29,11 @@ namespace Application.Features.Barbers.Queries.GetById
         {
             var barber = await _userManager.FindByIdAsync(request.BarberId);
             if (barber == null || barber.IsDeleted)
-                return Error.NotFound("barber.not.found", "Barber not found.");
+                return Error.NotFound("barber.not.found", "الحلاق ده مش موجود.");
 
             var isBarber = await _userManager.IsInRoleAsync(barber, "Barber");
             if (!isBarber)
-                return Error.NotFound("barber.not.found", "Barber not found.");
+                return Error.NotFound("barber.not.found", "الحلاق ده مش موجود.");
 
             var dto = _mapper.Map<BarberDTO>(barber);
 

@@ -24,12 +24,12 @@ namespace Application.Features.Admin.Services.Commands.DeleteService
 
             var service = await serviceRepo.GetByIdAsync(request.ServiceId);
             if (service == null)
-                return Error.NotFound("service.not.found", "Service not found.");
+                return Error.NotFound("service.not.found", "الخدمة دي مش موجودة.");
 
             var associatedBookingItems = await bookingItemRepo.FindAsync(bi => bi.ServiceId == request.ServiceId);
             if (associatedBookingItems.Any())
             {
-                return Error.Conflict("service.has.bookings", "Cannot delete service because it has associated booking items. Consider deactivating it instead.");
+                return Error.Conflict("service.has.bookings", "مينفعش تمسح الخدمة عشان مرتبطة بحجوزات قبل كده. ممكن تعطلها بدل ما تمسحها.");
             }
 
             serviceRepo.Delete(service);

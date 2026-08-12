@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -48,13 +48,13 @@ namespace Infrastructure.Storage.Services
             if (imageStream == null)
             {
                 _logger.LogWarning("Attempted to upload image with null stream");
-                return Error.Failure("image.upload.failed", "Image stream cannot be null");
+                return Error.Failure("image.upload.failed", "ملف الصورة مينفعش يكون فاضي");
             }
 
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 _logger.LogWarning("Attempted to upload image with invalid filename");
-                return Error.Failure("image.upload.failed", "File name cannot be null or empty");
+                return Error.Failure("image.upload.failed", "اسم الملف مينفعش يكون فاضي");
             }
 
             try
@@ -89,7 +89,7 @@ namespace Infrastructure.Storage.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while uploading image: {FileName}", fileName);
-                return Error.Failure("image.upload.failed", $"An error occurred: {ex.Message}");
+                return Error.Failure("image.upload.failed", $"حصل مشكلة: {ex.Message}");
             }
         }
 
@@ -98,7 +98,7 @@ namespace Infrastructure.Storage.Services
             if (string.IsNullOrWhiteSpace(publicId))
             {
                 _logger.LogWarning("Attempted to delete image with invalid public ID");
-                return Error.Failure("image.delete.failed", "Public ID cannot be null or empty");
+                return Error.Failure("image.delete.failed", "معرف الصورة مينفعش يكون فاضي");
             }
 
             try
@@ -119,7 +119,7 @@ namespace Infrastructure.Storage.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while deleting image with public ID: {PublicId}", publicId);
-                return Error.Failure("image.delete.failed", $"An error occurred: {ex.Message}");
+                return Error.Failure("image.delete.failed", $"حصل مشكلة: {ex.Message}");
             }
         }
     }

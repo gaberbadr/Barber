@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Controllers
@@ -13,8 +13,8 @@ namespace Controllers
         {
             return Ok(new
             {
-                message = "Welcome to Barber API",
-                version = "1.6",
+                message = "أهلاً بيك في نظام الحلاق",
+                version = "2.0",
                 status = "Running",
                 documentation = $"{Request.Scheme}://{Request.Host}/swagger",
                 endpoints = new

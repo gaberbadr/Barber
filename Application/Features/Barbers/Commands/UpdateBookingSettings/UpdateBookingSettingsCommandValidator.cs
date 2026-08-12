@@ -10,7 +10,7 @@ namespace Application.Features.Barbers.Commands.UpdateBookingSettings
         {
             RuleFor(x => x.BookingDurationMinutes)
                 .Must(d => AllowedDurations.Contains(d))
-                .WithMessage("Booking duration must be 15, 30, 45, or 60 minutes.");
+                .WithMessage("مدة الحجز لازم تكون 15، 30، 45، أو 60 دقيقة.");
         }
     }
 }

@@ -33,11 +33,11 @@ namespace Application.Features.Barbers.Commands.UpdateBookingSettings
         {
             var barber = await _userManager.FindByIdAsync(request.BarberId);
             if (barber == null)
-                return Error.NotFound("barber.not.found", "Barber not found.");
+                return Error.NotFound("barber.not.found", "الحلاق ده مش موجود.");
 
             var isBarber = await _userManager.IsInRoleAsync(barber, "Barber");
             if (!isBarber)
-                return Error.Forbidden("barber.not.barber", "User is not a barber.");
+                return Error.Forbidden("barber.not.barber", "المستخدم ده مش حلاق.");
 
             // If changing duration, check for affected future bookings
             if (barber.BookingDurationMinutes != request.BookingDurationMinutes)
@@ -51,8 +51,7 @@ namespace Application.Features.Barbers.Commands.UpdateBookingSettings
 
                 if (futureBookings.Any())
                     return Error.Conflict("barber.duration.has.bookings",
-                        "Cannot change booking duration while you have future confirmed bookings. " +
-                        "Please wait until they are completed or cancel them first.");
+                        "مينفعش تغيّر مدة الحجز لأنك عندك حجوزات مستقبلية مؤكدة. استنى لما تخلص أو الغيها الأول.");
             }
 
             barber.BookingDurationMinutes = request.BookingDurationMinutes;

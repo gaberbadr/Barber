@@ -7,15 +7,15 @@ namespace Application.Features.Admin.Barbers.Commands.AddBarber
         public AddBarberCommandValidator()
         {
             RuleFor(x => x.FullName)
-                .NotEmpty().WithMessage("Full name is required.")
-                .Length(2, 100).WithMessage("Full name must be between 2 and 100 characters.");
+                .NotEmpty().WithMessage("الاسم بالكامل مطلوب.")
+                .Length(2, 100).WithMessage("الاسم بالكامل لازم يكون بين 2 و 100 حرف.");
 
             RuleFor(x => x.Email)
-                .NotEmpty().WithMessage("Email is required.")
-                .EmailAddress().WithMessage("Email must be valid.");
+                .NotEmpty().WithMessage("البريد الإلكتروني مطلوب.")
+                .EmailAddress().WithMessage("البريد الإلكتروني غير صحيح.");
 
             RuleFor(x => x.BookingDurationMinutes)
-                .GreaterThan(0).WithMessage("Booking duration must be greater than 0.");
+                .GreaterThan(0).WithMessage("مدة الحجز لازم تكون أكتر من صفر.");
         }
     }
 }

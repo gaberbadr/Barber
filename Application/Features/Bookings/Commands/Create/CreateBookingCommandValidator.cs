@@ -7,26 +7,26 @@ namespace Application.Features.Bookings.Commands.Create
         public CreateBookingCommandValidator(TimeProvider timeProvider)
         {
             RuleFor(x => x.BarberId)
-                .NotEmpty().WithMessage("Barber is required.");
+                .NotEmpty().WithMessage("الحلاق مطلوب.");
 
             RuleFor(x => x.BookingDate)
-                .NotEmpty().WithMessage("Booking date is required.")
+                .NotEmpty().WithMessage("تاريخ الحجز مطلوب.")
                 .Must(date => date >= DateOnly.FromDateTime(timeProvider.GetLocalNow().Date))
-                .WithMessage("Booking date cannot be in the past.");
+                .WithMessage("تاريخ الحجز مينفعش يكون في الماضي.");
 
             RuleFor(x => x.StartTime)
-                .NotEmpty().WithMessage("Start time is required.");
+                .NotEmpty().WithMessage("وقت البداية مطلوب.");
 
             RuleFor(x => x.ServiceIds)
-                .NotEmpty().WithMessage("At least one service must be selected.");
+                .NotEmpty().WithMessage("لازم تختار خدمة واحدة على الأقل.");
 
             RuleFor(x => x.FullName)
-                .NotEmpty().WithMessage("Full name is required.")
-                .Length(2, 100).WithMessage("Full name must be between 2 and 100 characters.");
+                .NotEmpty().WithMessage("الاسم بالكامل مطلوب.")
+                .Length(2, 100).WithMessage("الاسم لازم يكون بين 2 و 100 حرف.");
 
             RuleFor(x => x.PhoneNumber)
-                .NotEmpty().WithMessage("Phone number is required.")
-                .Matches(@"^\d{10,15}$").WithMessage("Phone number must be between 10 and 15 digits.");
+                .NotEmpty().WithMessage("رقم الموبايل مطلوب.")
+                .Matches(@"^\d{10,15}$").WithMessage("رقم الموبايل لازم يكون بين 10 و 15 رقم.");
         }
     }
 }

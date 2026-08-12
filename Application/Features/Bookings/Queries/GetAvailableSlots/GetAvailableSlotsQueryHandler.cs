@@ -27,14 +27,14 @@ namespace Application.Features.Bookings.Queries.GetAvailableSlots
             // Verify barber
             var barber = await _userManager.FindByIdAsync(request.BarberId);
             if (barber == null)
-                return Error.NotFound("barber.not.found", "Barber not found.");
+                return Error.NotFound("barber.not.found", "الحلاق ده مش موجود.");
 
             if (!barber.IsActive)
-                return Error.Failure("barber.inactive", "This barber is inactive.");
+                return Error.Failure("barber.inactive", "الحلاق ده غير مفعل.");
 
             var isBarber = await _userManager.IsInRoleAsync(barber, "Barber");
             if (!isBarber)
-                return Error.Validation("barber.not.barber", "User is not a barber.");
+                return Error.Validation("barber.not.barber", "المستخدم ده مش حلاق.");
 
             if (!barber.AcceptingBookings)
                 return new List<AvailableSlotDTO>();
@@ -43,7 +43,7 @@ namespace Application.Features.Bookings.Queries.GetAvailableSlots
             var settingsRepo = _unitOfWork.Repository<GlobalBookingSettings, int>();
             var settings = (await settingsRepo.GetAllAsync()).FirstOrDefault();
             if (settings == null)
-                return Error.Failure("settings.missing", "Settings not configured.");
+                return Error.Failure("settings.missing", "الإعدادات مش مظبوطة.");
 
             // Check date range
             var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);

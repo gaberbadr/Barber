@@ -31,25 +31,25 @@ namespace Application.Features.Auth.Commands.VerifyOTP
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                return Error.NotFound("auth.user.not.found", "User not found.");
+                return Error.NotFound("auth.user.not.found", "المستخدم ده مش موجود.");
             }
 
             // Check if user is active
             if (!user.IsActive)
             {
-                return Error.Failure("auth.user.blocked", "This account is blocked. Please contact support.");
+                return Error.Failure("auth.user.blocked", "حسابك موقوف. يرجى التواصل مع الدعم.");
             }
 
             // Check if OTP is expired
             if (user.CodeExpiresAt == null || user.CodeExpiresAt < DateTime.UtcNow)
             {
-                return Error.Failure("auth.otp.expired", "Verification code has expired.");
+                return Error.Failure("auth.otp.expired", "كود التحقق انتهت صلاحيته.");
             }
 
             // Verify OTP
             if (user.VerificationCode != request.Code)
             {
-                return Error.Failure("auth.otp.invalid", "Invalid verification code.");
+                return Error.Failure("auth.otp.invalid", "كود التحقق غير صحيح.");
             }
 
             // Mark email as confirmed and clear OTP
@@ -60,7 +60,7 @@ namespace Application.Features.Auth.Commands.VerifyOTP
             var updateResult = await _userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
             {
-                return Error.Failure("auth.otp.verification.failed", "Failed to verify OTP.");
+                return Error.Failure("auth.otp.verification.failed", "فشل التحقق من الكود.");
             }
 
             // Generate tokens
