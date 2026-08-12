@@ -8,7 +8,7 @@ namespace Infrastructure.Email
 {
         public static class Templates
         {
-            private const string CompanyName = "Gaber Company";
+            private const string CompanyName = "Barber Shop";
             private const string CompanyYear = "2026";
 
             public static string WelcomeEmailTemplate(string userName, string activationLink)
@@ -233,6 +233,9 @@ namespace Infrastructure.Email
                     .detail-label {{ font-weight: bold; color: #495057; }}
                     .detail-value {{ color: #212529; }}
                     .booking-date {{ background-color: #007bff; color: white; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0; font-size: 16px; }}
+                    .whatsapp-button {{ display: inline-block; background-color: #25d366; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; text-align: center; }}
+                    .whatsapp-button:hover {{ background-color: #1ec857; }}
+                    .button-container {{ text-align: center; }}
                     .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
                 </style>
             </head>
@@ -263,6 +266,9 @@ namespace Infrastructure.Email
                             </div>
                         </div>
                         <p>Please make sure you're available at the scheduled time. If you have any issues, please contact the customer as soon as possible.</p>
+                        <div class='button-container'>
+                            <a href='https://wa.me/{customerPhone.Replace("+", "").Replace(" ", "").Replace("-", "")}' class='whatsapp-button'>💬 Chat on WhatsApp</a>
+                        </div>
                     </div>
                     <div class='footer'>
                         <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
@@ -292,6 +298,9 @@ namespace Infrastructure.Email
                     .detail-label {{ font-weight: bold; color: #495057; }}
                     .detail-value {{ color: #212529; }}
                     .cancellation-notice {{ background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                    .whatsapp-button {{ display: inline-block; background-color: #25d366; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; text-align: center; }}
+                    .whatsapp-button:hover {{ background-color: #1ec857; }}
+                    .button-container {{ text-align: center; }}
                     .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
                 </style>
             </head>
@@ -323,6 +332,9 @@ namespace Infrastructure.Email
                         </div>
                         <div class='cancellation-notice'>
                             <p><strong>This time slot is now available</strong> and can be booked by other customers.</p>
+                        </div>
+                        <div class='button-container'>
+                            <a href='https://wa.me/{customerPhone.Replace("+", "").Replace(" ", "").Replace("-", "")}' class='whatsapp-button'>💬 Chat on WhatsApp</a>
                         </div>
                     </div>
                     <div class='footer'>

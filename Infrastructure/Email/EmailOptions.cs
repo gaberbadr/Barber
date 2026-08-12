@@ -11,10 +11,13 @@ namespace Infrastructure.Email
     {
         public string Host { get; set; } = string.Empty;
         public int Port { get; set; } = 587;
+        public string SmtpUsername { get; set; } = string.Empty;
+        public string SmtpPassword { get; set; } = string.Empty;
         public string SenderEmail { get; set; } = string.Empty;
-        public string SenderPassword { get; set; } = string.Empty;
         public string SenderDisplayName { get; set; } = string.Empty;
         public bool EnableSsl { get; set; } = true;
         public int ExpirationMinutes { get; set; } = 3;
     }
 }
+
+//if we use brevo the stmpPasword will expire after one year so we need to change it every year and update the appsettings.json file

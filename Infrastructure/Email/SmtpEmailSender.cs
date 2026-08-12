@@ -19,7 +19,7 @@ namespace Infrastructure.Email
             using (var client = new SmtpClient(_emailOptions.Host, _emailOptions.Port))
             {
                 client.EnableSsl = _emailOptions.EnableSsl;
-                client.Credentials = new NetworkCredential(_emailOptions.SenderEmail, _emailOptions.SenderPassword);
+                client.Credentials = new NetworkCredential(_emailOptions.SmtpUsername, _emailOptions.SmtpPassword);
 
                 var mailMessage = new MailMessage
                 {
