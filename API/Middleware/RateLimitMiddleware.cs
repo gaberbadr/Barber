@@ -16,6 +16,9 @@ namespace API.Middleware
     /// - For anonymous requests: Uses a secure HttpOnly cookie-based ClientId
     /// - Applies a global IP-based limit as additional protection against bots
     /// 
+    /// Designed to be resilient to rate limiting infrastructure failures.
+    /// If rate limiting checks fail, requests are allowed to pass through (fail-open).
+    /// 
     /// Configuration is loaded from appsettings.json under "RateLimiting" section.
     /// Configurable excluded paths and rate limit policies.
     /// </summary>
@@ -38,6 +41,7 @@ namespace API.Middleware
         /// <summary>
         /// Processes the HTTP request and applies rate limiting checks.
         /// Adds response headers and logs rejected requests with detailed information.
+        /// Resilient to infrastructure failures - if rate limiting fails, request is allowed.
         /// </summary>
         public async Task InvokeAsync(
             HttpContext context,
@@ -54,9 +58,25 @@ namespace API.Middleware
 
             try
             {
+                // Validate that CurrentUser has the minimum data needed
+                // CurrentUser can safely return null for HttpContext-dependent properties
+                if (currentUser == null)
+                {
+                    _logger.LogWarning("CurrentUser was null in RateLimitMiddleware, allowing request to proceed");
+                    await _next(context);
+                    return;
+                }
+
                 // Get the partition key based on authentication status
                 var partitionKey = GetPartitionKey(context, currentUser);
-                var globalIpKey = $"ip:{currentUser.IpAddress}";
+                if (string.IsNullOrWhiteSpace(partitionKey))
+                {
+                    _logger.LogWarning("Could not determine partition key for rate limiting, allowing request to proceed");
+                    await _next(context);
+                    return;
+                }
+
+                var globalIpKey = $"ip:{currentUser.IpAddress ?? "unknown"}";
 
                 // Get current counts for response headers
                 var globalIpCount = await rateLimitService.GetCurrentCountAsync(globalIpKey);
@@ -123,12 +143,28 @@ namespace API.Middleware
                 // Request is allowed, proceed
                 await _next(context);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
+                // Handle specific cases like missing HttpContext or configuration issues
                 _logger.LogError(
                     ex,
-                    "Unexpected error occurred in RateLimitMiddleware for path: {Path}",
-                    context.Request.Path);
+                    "Configuration or context error in RateLimitMiddleware for path: {Path}. " +
+                    "Allowing request to proceed. Error: {ErrorMessage}",
+                    context.Request.Path,
+                    ex.Message);
+
+                // Allow request to proceed (fail-open)
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                // Catch other infrastructure failures (Redis, storage, etc.)
+                _logger.LogError(
+                    ex,
+                    "Unexpected error in RateLimitMiddleware for path: {Path}. " +
+                    "Allowing request to proceed (rate limiting temporarily unavailable). Error: {ErrorMessage}",
+                    context.Request.Path,
+                    ex.Message);
 
                 // Don't block the request if rate limiter fails (fail-open)
                 await _next(context);
@@ -142,7 +178,7 @@ namespace API.Middleware
         /// </summary>
         private string GetPartitionKey(HttpContext context, CurrentUser currentUser)
         {
-            // For authenticated users, use UserId as primary key with IP for specificity
+            // For authenticated users, use UserId as primary key
             if (currentUser.IsAuthenticated && !string.IsNullOrEmpty(currentUser.UserId))
             {
                 return $"user:{currentUser.UserId}";
@@ -231,6 +267,7 @@ namespace API.Middleware
         /// <summary>
         /// Logs a rejected request with detailed information for monitoring and debugging.
         /// Includes: UserId (if authenticated), ClientId (if anonymous), IP, endpoint, timestamp.
+        /// Handles null values gracefully for safety.
         /// </summary>
         private void LogRejectedRequest(
             HttpContext context,
@@ -238,18 +275,26 @@ namespace API.Middleware
             string reason,
             string partitionKey)
         {
-            var userInfo = currentUser.IsAuthenticated
-                ? $"UserId={currentUser.UserId}"
-                : $"ClientId={partitionKey}";
+            try
+            {
+                var userInfo = currentUser.IsAuthenticated
+                    ? $"UserId={currentUser.UserId}"
+                    : $"ClientId={partitionKey}";
 
-            _logger.LogWarning(
-                "Rate limit rejected: {UserInfo}, IP={IpAddress}, Method={Method}, Path={Path}, Reason={Reason}, Timestamp={Timestamp}",
-                userInfo,
-                currentUser.IpAddress,
-                context.Request.Method,
-                context.Request.Path,
-                reason,
-                DateTime.UtcNow);
+                _logger.LogWarning(
+                    "Rate limit rejected: {UserInfo}, IP={IpAddress}, Method={Method}, Path={Path}, Reason={Reason}, Timestamp={Timestamp}",
+                    userInfo,
+                    currentUser.IpAddress ?? "unknown",
+                    context.Request.Method,
+                    context.Request.Path,
+                    reason,
+                    DateTime.UtcNow);
+            }
+            catch (Exception ex)
+            {
+                // If logging fails, don't crash - just log a generic message
+                _logger.LogError(ex, "Failed to log rate limit rejection");
+            }
         }
     }
 }

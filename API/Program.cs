@@ -38,25 +38,77 @@ builder.Services.AddAuthorizationServices();
 
 var app = builder.Build();
 
-//when app run, it automaticlly apply all migrations (Update DataBase)
+// Apply database migrations and seed initial data
+// This runs on startup to ensure database is initialized
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 var context = services.GetRequiredService<ApplicationDbContext>();
-var LoggerFactory = services.GetRequiredService<ILoggerFactory>();
-var usermanger = services.GetRequiredService<UserManager<ApplicationUser>>();
-var userrole = services.GetRequiredService<RoleManager<IdentityRole>>();
+var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+var logger = loggerFactory.CreateLogger("Startup.DatabaseInitialization");
+
 try
 {
-    await context.Database.MigrateAsync();// Update-DataBase
-    await DefaultRolesSeeder.SeedRolesAsync(userrole);
-    await DefaultAdminSeeder.SeedAppUserAsync(usermanger, userrole);
-    await DatabaseSeeder.SeedAsync(context);
+    logger.LogInformation("Starting database migration...");
+    await context.Database.MigrateAsync();
+    logger.LogInformation("Database migration completed successfully.");
 }
 catch (Exception ex)
 {
-    var logger = LoggerFactory.CreateLogger<Program>();
-    logger.LogError(ex, "their are problem during migration");
+    logger.LogError(
+        ex,
+        "Failed to apply database migrations. " +
+        "Application startup will continue but database may not be properly initialized. " +
+        "Ensure database connectivity and migrations are applied manually if needed.");
 }
+
+try
+{
+    logger.LogInformation("Starting role seeding...");
+    await DefaultRolesSeeder.SeedRolesAsync(roleManager);
+    logger.LogInformation("Role seeding completed successfully.");
+}
+catch (Exception ex)
+{
+    logger.LogError(
+        ex,
+        "Failed to seed default roles. " +
+        "Application startup will continue but required roles may not exist. " +
+        "Authorization may fail for some users.");
+}
+
+try
+{
+    logger.LogInformation("Starting admin user seeding...");
+    await DefaultAdminSeeder.SeedAppUserAsync(userManager, roleManager);
+    logger.LogInformation("Admin user seeding completed successfully.");
+}
+catch (Exception ex)
+{
+    logger.LogError(
+        ex,
+        "Failed to seed default admin users. " +
+        "Application startup will continue but default admin accounts may not be created. " +
+        "You may need to create admin users manually.");
+}
+
+try
+{
+    logger.LogInformation("Starting database seeding...");
+    await DatabaseSeeder.SeedAsync(context);
+    logger.LogInformation("Database seeding completed successfully.");
+}
+catch (Exception ex)
+{
+    logger.LogError(
+        ex,
+        "Failed to seed database with initial data. " +
+        "Application startup will continue but some reference data may be missing. " +
+        "Services, working hours, coupons, and booking settings may need to be created manually.");
+}
+
+logger.LogInformation("Database initialization completed. Application is starting.");
 
 app.UseSwaggerDocumentation();
 app.UseApiMiddlewares();

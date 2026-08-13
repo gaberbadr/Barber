@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using Zero.Infrastructure.Caching.Services;
 using Zero.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure
 {
@@ -80,50 +81,116 @@ namespace Infrastructure
             services.Configure<RedisOptions>(
                 configuration.GetSection("CacheSettings:Redis"));
 
+            // If Redis is disabled, register null connection multiplexer
+            // RateLimitService will handle gracefully with in-memory fallback
             if (!redisOptions.Enabled)
+            {
+                services.AddSingleton<IConnectionMultiplexer?>(sp => null);
+                services.AddSingleton<ICacheService, RedisCacheService>();
+                services.AddSingleton<IRateLimitService, RateLimitService>();
                 return;
+            }
 
-            var connectionString =
-                configuration.GetConnectionString("REDIS_URL");
+            // Redis is enabled - validate configuration and register with safe connection handling
+            var connectionString = configuration.GetConnectionString("REDIS_URL");
 
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException(
-                    "ConnectionStrings:REDIS_URL was not found.");
-
-            services.AddSingleton<IConnectionMultiplexer>(_ =>
             {
-                var uri = new Uri(connectionString);
-
-                var options = new ConfigurationOptions
+                // Log warning but don't crash - allow in-memory fallback
+                // This ensures Production doesn't become unavailable due to missing Redis URL
+                services.AddSingleton<IConnectionMultiplexer?>(sp =>
                 {
-                    AbortOnConnectFail = false,
-                    Ssl = true,
-                    ConnectRetry = 3,
-                    ConnectTimeout = redisOptions.ConnectTimeoutMs,
-                    SyncTimeout = redisOptions.SyncTimeoutMs,
-                    KeepAlive = 180
-                };
+                    var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Redis.Configuration");
+                    logger.LogWarning(
+                        "Redis is enabled in configuration but ConnectionStrings:REDIS_URL is not configured. " +
+                        "Rate limiting and caching will use in-memory fallback. " +
+                        "This is not recommended for production environments with multiple instances.");
+                    return null;
+                });
 
-                options.EndPoints.Add(uri.Host, uri.Port);
+                services.AddSingleton<ICacheService, RedisCacheService>();
+                services.AddSingleton<IRateLimitService, RateLimitService>();
+                return;
+            }
 
-                var userInfo = uri.UserInfo.Split(':', 2);
+            // Redis connection string is configured - attempt connection
+            services.AddSingleton<IConnectionMultiplexer?>(sp =>
+            {
+                try
+                {
+                    var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Redis.Configuration");
+                    
+                    var uri = new Uri(connectionString);
 
-                options.User = userInfo[0];
-                options.Password = userInfo[1];
+                    var options = new ConfigurationOptions
+                    {
+                        AbortOnConnectFail = false,
+                        Ssl = true,
+                        ConnectRetry = 3,
+                        ConnectTimeout = redisOptions.ConnectTimeoutMs,
+                        SyncTimeout = redisOptions.SyncTimeoutMs,
+                        KeepAlive = 180
+                    };
 
-                // Upstash Recommended
-                options.AbortOnConnectFail = false;
-                options.Ssl = true;
+                    options.EndPoints.Add(uri.Host, uri.Port);
 
-                options.ConnectRetry = 3;
-                options.ConnectTimeout = redisOptions.ConnectTimeoutMs;
-                options.SyncTimeout = redisOptions.SyncTimeoutMs;
-                options.KeepAlive = 180;
+                    var userInfo = uri.UserInfo?.Split(':', 2);
+                    if (userInfo?.Length == 2)
+                    {
+                        options.User = userInfo[0];
+                        options.Password = userInfo[1];
+                    }
+                    else if (!string.IsNullOrWhiteSpace(uri.UserInfo))
+                    {
+                        logger.LogWarning(
+                            "Redis connection string is malformed (missing user credentials). " +
+                            "Expected format: redis://username:password@host:port");
+                    }
 
-                return ConnectionMultiplexer.Connect(options);
+                    var connection = ConnectionMultiplexer.Connect(options);
+                    
+                    if (connection.IsConnected)
+                    {
+                        logger.LogInformation("Successfully connected to Redis at {Host}:{Port}", uri.Host, uri.Port);
+                    }
+                    else
+                    {
+                        logger.LogWarning(
+                            "Redis connection could not be established (AbortOnConnectFail=false allows graceful degradation). " +
+                            "Rate limiting and caching will fall back to in-memory storage. " +
+                            "This is not recommended for production environments with multiple instances.");
+                    }
+
+                    return connection;
+                }
+                catch (UriFormatException ex)
+                {
+                    var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Redis.Configuration");
+                    logger.LogError(
+                        ex,
+                        "Redis connection string is malformed. " +
+                        "Expected format: redis://username:password@host:port. " +
+                        "Rate limiting and caching will fall back to in-memory storage. " +
+                        "This is not recommended for production environments with multiple instances.");
+                    
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Redis.Configuration");
+                    logger.LogError(
+                        ex,
+                        "Failed to initialize Redis connection. " +
+                        "Rate limiting and caching will fall back to in-memory storage. " +
+                        "Check your ConnectionStrings:REDIS_URL configuration. " +
+                        "This is not recommended for production environments with multiple instances.");
+                    
+                    return null;
+                }
             });
 
             services.AddSingleton<ICacheService, RedisCacheService>();
+            services.AddSingleton<IRateLimitService, RateLimitService>();
         }
 
         private static void AddStorageServices(
@@ -167,13 +234,36 @@ namespace Infrastructure
 
         private static void AddApplicationServices(IServiceCollection services, IConfiguration configuration)
         {
+            // Configure JWT options
             services.Configure<JwtOptions>(configuration.GetSection("JWT"));
+            
+            // Validate JWT configuration at startup to catch configuration issues early
+            var jwtOptions = configuration.GetSection("JWT").Get<JwtOptions>();
+            if (jwtOptions != null)
+            {
+                try
+                {
+                    jwtOptions.Validate();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    throw new InvalidOperationException(
+                        "JWT configuration validation failed during service registration. " +
+                        "The application cannot start without valid JWT configuration.",
+                        ex);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "JWT configuration section is not present in appsettings.json. " +
+                    "A 'JWT' section with Key, Issuer, and Audience is required to start the application.");
+            }
             
             services.AddScoped<IJwtService, JwtService>();
 
             services.Configure<RateLimitingOptions>(
                 configuration.GetSection("RateLimiting"));
-            services.AddScoped<IRateLimitService, RateLimitService>();
         }
     }
 }
