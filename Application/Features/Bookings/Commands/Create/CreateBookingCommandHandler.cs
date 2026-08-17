@@ -258,13 +258,16 @@ namespace Application.Features.Bookings.Commands.Create
             dto.Items = _mapper.Map<List<BookingItemDTO>>(items);
 
             // 20. Send booking notification email to barber
-            await _emailSender.SendBookingInfoAsync(
-                barber.Email ?? string.Empty,
-                barber.FullName ?? "Barber",
-                request.FullName,
-                request.PhoneNumber,
-                request.BookingDate,
-                request.StartTime);
+            if (!string.IsNullOrWhiteSpace(barber.Email))
+            {
+                await _emailSender.SendBookingInfoAsync(
+                    barber.Email,
+                    barber.FullName ?? "Barber",
+                    request.FullName,
+                    request.PhoneNumber,
+                    request.BookingDate,
+                    request.StartTime);
+            }
 
             return dto;
         }
