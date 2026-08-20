@@ -21,6 +21,10 @@ namespace Application.Features.Admin.Dashboard.Commands.ToggleUserBlock
             if (user == null)
                 return Error.NotFound("user.not.found", "المستخدم ده مش موجود.");
 
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            if (isAdmin)
+                return Error.Forbidden("admin.cannot.be.blocked", "مينفعش تحظر أدمن.");
+
             user.IsActive = !request.Block;
             user.UpdatedAt = DateTime.UtcNow;
 

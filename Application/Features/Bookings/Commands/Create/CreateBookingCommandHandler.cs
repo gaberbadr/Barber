@@ -128,11 +128,12 @@ namespace Application.Features.Bookings.Commands.Create
                     $"المواعيد لازم تكون متقسمة لفترات مدتها {barber.BookingDurationMinutes} دقيقة.");
 
             // 10. Check for overlapping confirmed bookings (concurrency-safe check)
+            var validBookingStatuses = new[] { BookingStatus.Confirmed, BookingStatus.Arrived, BookingStatus.DidNotArrive };
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
             var overlapping = await bookingRepo.FindFirstAsync(b =>
                 b.BarberId == request.BarberId &&
                 b.BookingDate == request.BookingDate &&
-                b.Status == BookingStatus.Confirmed &&
+                validBookingStatuses.Contains(b.Status) &&
                 b.StartTime < endTime &&
                 b.EndTime > request.StartTime);
 
@@ -143,10 +144,10 @@ namespace Application.Features.Bookings.Commands.Create
             var existingUserBooking = await bookingRepo.FindFirstAsync(b =>
                 b.CustomerId == request.CustomerId &&
                 b.BookingDate == request.BookingDate &&
-                b.Status == BookingStatus.Confirmed);
+                validBookingStatuses.Contains(b.Status));
 
             if (existingUserBooking != null)
-                return Error.Conflict("booking.daily.limit", "إنت عندك حجز مؤكد في اليوم ده بالفعل.");
+                return Error.Conflict("booking.daily.limit", "إنت عندك حجز في اليوم ده بالفعل.");
 
             // 12. Validate selected services
             var serviceRepo = _unitOfWork.Repository<Service, int>();

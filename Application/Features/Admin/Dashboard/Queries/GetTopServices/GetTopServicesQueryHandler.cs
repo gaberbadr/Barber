@@ -20,7 +20,8 @@ namespace Application.Features.Admin.Dashboard.Queries.GetTopServices
         public async Task<ErrorOr<List<TopServiceDTO>>> Handle(GetTopServicesQuery request, CancellationToken cancellationToken)
         {
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
-            var confirmedBookingIds = (await bookingRepo.FindAsync(b => b.Status == BookingStatus.Confirmed))
+            var validBookingStatuses = new[] { BookingStatus.Confirmed, BookingStatus.Arrived, BookingStatus.DidNotArrive };
+            var confirmedBookingIds = (await bookingRepo.FindAsync(b => validBookingStatuses.Contains(b.Status)))
                 .Select(b => b.Id)
                 .ToHashSet();
 

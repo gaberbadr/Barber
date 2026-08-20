@@ -45,10 +45,11 @@ namespace Application.Features.Admin.Barbers.Commands.RemoveBarber
                     $"مينفعش تحذف حلاق عنده {count} حجوزات جاية. يرجى إلغائها أو إتمامها الأول.");
             }
 
-            // Remove Barber role
-            await _userManager.RemoveFromRoleAsync(barber, "Barber");
+            // Do NOT remove Barber role to preserve historical booking data
+            // await _userManager.RemoveFromRoleAsync(barber, "Barber");
 
             // Deactivate the barber (not deleting, to preserve historical booking data)
+            barber.IsDeleted = true;
             barber.IsActive = false;
             barber.AcceptingBookings = false;
             barber.UpdatedAt = _timeProvider.GetUtcNow().DateTime;

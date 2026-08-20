@@ -46,6 +46,8 @@ namespace Infrastructure
 
             AddApplicationServices(services, configuration);
 
+            services.AddHostedService<Infrastructure.BackgroundServices.BookingStatusUpdateService>();
+
             return services;
         }
 

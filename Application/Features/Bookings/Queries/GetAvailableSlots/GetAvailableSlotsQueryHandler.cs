@@ -79,10 +79,11 @@ namespace Application.Features.Bookings.Queries.GetAvailableSlots
 
             // Get existing confirmed bookings for this barber on this date
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
+            var validBookingStatuses = new[] { BookingStatus.Confirmed, BookingStatus.Arrived, BookingStatus.DidNotArrive };
             var existingBookings = await bookingRepo.FindAsync(b =>
                 b.BarberId == request.BarberId &&
                 b.BookingDate == request.Date &&
-                b.Status == BookingStatus.Confirmed);
+                validBookingStatuses.Contains(b.Status));
 
             var bookedSlots = existingBookings
                 .Select(b => (b.StartTime, b.EndTime))

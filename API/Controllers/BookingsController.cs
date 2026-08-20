@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Requests.Bookings;
 using Application.Common.Models;
+using Application.Features.Bookings.Commands.UpdateStatus;
 
 namespace API.Controllers
 {
@@ -114,6 +115,27 @@ namespace API.Controllers
                 BookingId = id,
                 CancelledByUserId = _currentUser.UserId!
             });
+            if (result.IsError) return HandleErrorResult(result.Errors);
+            return Ok(ApiResponse<object>.SuccessResponse(result.Value));
+        }
+        /// <summary>
+        /// Update booking status.
+        /// </summary>
+        [HttpPatch("{id}/status")]
+        [Authorize(Roles = "Admin, Barber")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateBookingStatusRequest request)
+        {
+            var command = new UpdateBookingStatusCommand
+            {
+                BookingId = id,
+                NewStatus = request.Status,
+                RequestingUserId = _currentUser.UserId!
+            };
+            var result = await _mediator.Send(command);
             if (result.IsError) return HandleErrorResult(result.Errors);
             return Ok(ApiResponse<object>.SuccessResponse(result.Value));
         }

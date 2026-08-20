@@ -25,7 +25,8 @@ namespace Application.Features.Admin.Dashboard.Queries.GetTopBarbers
         public async Task<ErrorOr<List<TopBarberDTO>>> Handle(GetTopBarbersQuery request, CancellationToken cancellationToken)
         {
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
-            var confirmedBookings = await bookingRepo.FindAsync(b => b.Status == BookingStatus.Confirmed);
+            var validBookingStatuses = new[] { BookingStatus.Confirmed, BookingStatus.Arrived, BookingStatus.DidNotArrive };
+            var confirmedBookings = await bookingRepo.FindAsync(b => validBookingStatuses.Contains(b.Status));
 
             var topBarbers = confirmedBookings
                 .GroupBy(b => b.BarberId)

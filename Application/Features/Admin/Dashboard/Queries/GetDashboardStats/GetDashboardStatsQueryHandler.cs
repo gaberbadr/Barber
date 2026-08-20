@@ -41,7 +41,9 @@ namespace Application.Features.Admin.Dashboard.Queries.GetDashboardStats
             var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);
             var firstOfMonth = new DateOnly(today.Year, today.Month, 1);
 
-            var confirmedBookings = allBookings.Where(b => b.Status == BookingStatus.Confirmed).ToList();
+            var validBookingStatuses = new[] { BookingStatus.Confirmed, BookingStatus.Arrived, BookingStatus.DidNotArrive };
+            
+            var confirmedBookings = allBookings.Where(b => validBookingStatuses.Contains(b.Status)).ToList();
             var cancelledBookings = allBookings.Where(b => b.Status == BookingStatus.Cancelled).ToList();
 
             var dto = new DashboardStatsDTO

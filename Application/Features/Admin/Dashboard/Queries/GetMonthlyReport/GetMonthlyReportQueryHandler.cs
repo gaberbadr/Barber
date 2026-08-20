@@ -59,9 +59,9 @@ namespace Application.Features.Admin.Dashboard.Queries.GetMonthlyReport
                 .Select(g => new MonthlyReportDTO
                 {
                     Month = $"{g.Key.Year}-{g.Key.Month:D2}",
-                    ConfirmedBookingCount = g.Count(b => b.Status == BookingStatus.Confirmed),
+                    ConfirmedBookingCount = g.Count(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Arrived || b.Status == BookingStatus.DidNotArrive),
                     CancelledBookingCount = g.Count(b => b.Status == BookingStatus.Cancelled),
-                    TotalRevenue = g.Where(b => b.Status == BookingStatus.Confirmed).Sum(b => b.TotalPrice)
+                    TotalRevenue = g.Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Arrived || b.Status == BookingStatus.DidNotArrive).Sum(b => b.TotalPrice)
                 })
                 .OrderBy(m => m.Month)
                 .ToList();

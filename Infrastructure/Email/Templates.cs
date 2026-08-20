@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,141 +6,147 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Email
 {
-        public static class Templates
-        {
-            private const string CompanyName = "Barber Shop";
-            private const string CompanyYear = "2026";
+    public static class Templates
+    {
+        private const string CompanyName = "Barber Shop";
+        private const string CompanyYear = "2026";
 
-            public static string WelcomeEmailTemplate(string userName, string activationLink)
-            {
-                return $@"
+        public static string WelcomeEmailTemplate(string userName, string activationLink)
+        {
+            return $@"
             <!DOCTYPE html>
-            <html>
+            <html dir='rtl' lang='ar'>
             <head>
                 <meta charset='UTF-8'>
                 <style>
-                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; direction: rtl; text-align: right; }}
                     .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                     .header {{ text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 20px; }}
                     .header h1 {{ color: #007bff; margin: 0; }}
                     .content {{ padding: 20px 0; }}
-                    .content p {{ color: #333; line-height: 1.6; }}
-                    .button {{ display: inline-block; background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+                    .content p {{ color: #333; line-height: 1.6; font-size: 16px; }}
+                    .button {{ display: inline-block; background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; text-align: center; }}
+                    .button-container {{ text-align: center; }}
                     .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
                 </style>
             </head>
             <body>
                 <div class='container'>
                     <div class='header'>
-                        <h1>Welcome!</h1>
+                        <h1>أهلاً بيك!</h1>
                     </div>
                     <div class='content'>
-                        <p>Hello <strong>{userName}</strong>,</p>
-                        <p>Thank you for registering with us. We're excited to have you on board!</p>
-                        <p>Please verify your email address by clicking the button below:</p>
-                        <a href='{activationLink}' class='button'>Verify Email Address</a>
-                        <p>If you didn't create this account, you can safely ignore this email.</p>
+                        <p>أهلاً يا <strong>{userName}</strong>،</p>
+                        <p>شكراً إنك سجلت معانا. إحنا مبسوطين جداً بوجودك!</p>
+                        <p>يا ريت تأكد الإيميل بتاعك من خلال الضغط على الزرار اللي تحت:</p>
+                        <div class='button-container'>
+                            <a href='{activationLink}' class='button'>تأكيد الإيميل</a>
+                        </div>
+                        <p>لو معملتش الحساب ده، تقدر تتجاهل الإيميل ده بأمان.</p>
                     </div>
                     <div class='footer'>
-                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
+                        <p>&copy; {CompanyYear} {CompanyName}. جميع الحقوق محفوظة.</p>
                     </div>
                 </div>
             </body>
             </html>";
-            }
+        }
 
-            public static string PasswordResetTemplate(string userName, string resetLink)
-            {
-                return $@"
+        public static string PasswordResetTemplate(string userName, string resetLink)
+        {
+            return $@"
             <!DOCTYPE html>
-            <html>
+            <html dir='rtl' lang='ar'>
             <head>
                 <meta charset='UTF-8'>
                 <style>
-                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; direction: rtl; text-align: right; }}
                     .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                     .header {{ text-align: center; border-bottom: 2px solid #dc3545; padding-bottom: 20px; }}
                     .header h1 {{ color: #dc3545; margin: 0; }}
                     .content {{ padding: 20px 0; }}
-                    .content p {{ color: #333; line-height: 1.6; }}
-                    .button {{ display: inline-block; background-color: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+                    .content p {{ color: #333; line-height: 1.6; font-size: 16px; }}
+                    .button {{ display: inline-block; background-color: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }}
+                    .button-container {{ text-align: center; }}
                     .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
-                    .warning {{ background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 20px 0; }}
+                    .warning {{ background-color: #fff3cd; border-right: 4px solid #ffc107; padding: 10px; margin: 20px 0; text-align: right; }}
                 </style>
             </head>
             <body>
                 <div class='container'>
                     <div class='header'>
-                        <h1>Password Reset Request</h1>
+                        <h1>طلب تغيير الباسورد</h1>
                     </div>
                     <div class='content'>
-                        <p>Hello <strong>{userName}</strong>,</p>
-                        <p>We received a request to reset your password. Click the button below to proceed:</p>
-                        <a href='{resetLink}' class='button'>Reset Password</a>
+                        <p>أهلاً يا <strong>{userName}</strong>،</p>
+                        <p>وصلنا طلب لتغيير الباسورد بتاعك. دوس على الزرار اللي تحت عشان تكمل:</p>
+                        <div class='button-container'>
+                            <a href='{resetLink}' class='button'>تغيير الباسورد</a>
+                        </div>
                         <div class='warning'>
-                            <p><strong>Note:</strong> This link will expire in 1 hour. If you didn't request this reset, please ignore this email.</p>
+                            <p><strong>ملاحظة:</strong> اللينك ده هينتهي بعد ساعة واحدة. لو مطلبش التغيير ده، يرجى تجاهل الإيميل.</p>
                         </div>
                     </div>
                     <div class='footer'>
-                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
+                        <p>&copy; {CompanyYear} {CompanyName}. جميع الحقوق محفوظة.</p>
                     </div>
                 </div>
             </body>
             </html>";
-            }
+        }
 
-            public static string ConfirmationEmailTemplate(string userName, string message)
-            {
-                return $@"
+        public static string ConfirmationEmailTemplate(string userName, string message)
+        {
+            return $@"
             <!DOCTYPE html>
-            <html>
+            <html dir='rtl' lang='ar'>
             <head>
                 <meta charset='UTF-8'>
                 <style>
-                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; direction: rtl; text-align: right; }}
                     .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                     .header {{ text-align: center; border-bottom: 2px solid #28a745; padding-bottom: 20px; }}
                     .header h1 {{ color: #28a745; margin: 0; }}
                     .content {{ padding: 20px 0; }}
-                    .content p {{ color: #333; line-height: 1.6; }}
-                    .success-box {{ background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; }}
+                    .content p {{ color: #333; line-height: 1.6; font-size: 16px; }}
+                    .success-box {{ background-color: #d4edda; border-right: 4px solid #28a745; padding: 15px; margin: 20px 0; }}
                     .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
                 </style>
             </head>
             <body>
                 <div class='container'>
                     <div class='header'>
-                        <h1>✓ Confirmation</h1>
+                        <h1>✓ تأكيد</h1>
                     </div>
                     <div class='content'>
-                        <p>Hello <strong>{userName}</strong>,</p>
+                        <p>أهلاً يا <strong>{userName}</strong>،</p>
                         <div class='success-box'>
                             <p>{message}</p>
                         </div>
-                        <p>Thank you for using our service!</p>
+                        <p>شكراً إنك بتستخدم خدماتنا!</p>
                     </div>
                     <div class='footer'>
-                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
+                        <p>&copy; {CompanyYear} {CompanyName}. جميع الحقوق محفوظة.</p>
                     </div>
                 </div>
             </body>
             </html>";
-            }
+        }
 
-            public static string NotificationEmailTemplate(string userName, string title, string content)
-            {
-                return $@"
+        public static string NotificationEmailTemplate(string userName, string title, string content)
+        {
+            return $@"
             <!DOCTYPE html>
-            <html>
+            <html dir='rtl' lang='ar'>
             <head>
                 <meta charset='UTF-8'>
                 <style>
-                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; direction: rtl; text-align: right; }}
                     .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                     .header {{ text-align: center; border-bottom: 2px solid #17a2b8; padding-bottom: 20px; }}
                     .header h1 {{ color: #17a2b8; margin: 0; }}
                     .content {{ padding: 20px 0; }}
-                    .content p {{ color: #333; line-height: 1.6; }}
+                    .content p {{ color: #333; line-height: 1.6; font-size: 16px; }}
                     .title {{ font-size: 18px; font-weight: bold; color: #17a2b8; margin: 20px 0 10px 0; }}
                     .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
                 </style>
@@ -148,38 +154,38 @@ namespace Infrastructure.Email
             <body>
                 <div class='container'>
                     <div class='header'>
-                        <h1>Notification</h1>
+                        <h1>إشعار جديد</h1>
                     </div>
                     <div class='content'>
-                        <p>Hello <strong>{userName}</strong>,</p>
+                        <p>أهلاً يا <strong>{userName}</strong>،</p>
                         <div class='title'>{title}</div>
                         <p>{content}</p>
                     </div>
                     <div class='footer'>
-                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
+                        <p>&copy; {CompanyYear} {CompanyName}. جميع الحقوق محفوظة.</p>
                     </div>
                 </div>
             </body>
             </html>";
-            }
+        }
 
-            public static string OtpEmailTemplate(string userName, string otp, int expirationMinutes = 10)
-            {
-                return $@"
+        public static string OtpEmailTemplate(string userName, string otp, int expirationMinutes = 10)
+        {
+            return $@"
             <!DOCTYPE html>
-            <html>
+            <html dir='rtl' lang='ar'>
             <head>
                 <meta charset='UTF-8'>
                 <style>
-                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; direction: rtl; text-align: right; }}
                     .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                     .header {{ text-align: center; border-bottom: 2px solid #ff9800; padding-bottom: 20px; }}
                     .header h1 {{ color: #ff9800; margin: 0; }}
                     .content {{ padding: 20px 0; }}
-                    .content p {{ color: #333; line-height: 1.6; }}
+                    .content p {{ color: #333; line-height: 1.6; font-size: 16px; }}
                     .otp-box {{ background-color: #fff3e0; border: 2px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }}
-                    .otp-code {{ font-size: 32px; font-weight: bold; color: #ff9800; letter-spacing: 4px; font-family: 'Courier New', monospace; }}
-                    .security-info {{ background-color: #f3f3f3; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0; font-size: 13px; }}
+                    .otp-code {{ font-size: 32px; font-weight: bold; color: #ff9800; letter-spacing: 4px; font-family: 'Courier New', monospace; direction: ltr; display: inline-block; }}
+                    .security-info {{ background-color: #f3f3f3; border-right: 4px solid #ff9800; padding: 15px; margin: 20px 0; font-size: 13px; }}
                     .security-info strong {{ color: #ff9800; }}
                     .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
                 </style>
@@ -187,52 +193,51 @@ namespace Infrastructure.Email
             <body>
                 <div class='container'>
                     <div class='header'>
-                        <h1>🔐 One-Time Password</h1>
+                        <h1>🔐 كود التحقق</h1>
                     </div>
                     <div class='content'>
-                        <p>Hello <strong>{userName}</strong>,</p>
-                        <p>Your One-Time Password (OTP) is:</p>
+                        <p>أهلاً يا <strong>{userName}</strong>،</p>
+                        <p>كود التحقق الخاص بيك هو:</p>
                         <div class='otp-box'>
                             <div class='otp-code'>{otp}</div>
                         </div>
                         <div class='security-info'>
-                            <p><strong>⏱️ Expires in:</strong> {expirationMinutes} minutes</p>
-                            <p><strong>🔒 Security Reminder:</strong></p>
-                            <ul style='margin: 10px 0; padding-left: 20px;'>
-                                <li>Never share this OTP with anyone</li>
-                                <li>This is a one-time code and cannot be reused</li>
-                                <li>Our team will never ask you for this code</li>
+                            <p><strong>⏱️ هينتهي بعد:</strong> {expirationMinutes} دقايق</p>
+                            <p><strong>🔒 تعليمات الأمان:</strong></p>
+                            <ul style='margin: 10px 0; padding-right: 20px;'>
+                                <li>ماتشاركش الكود ده مع أي حد</li>
+                                <li>الكود ده بيستخدم مرة واحدة بس ومينفعش تستخدمه تاني</li>
+                                <li>فريقنا عمره ما هيطلب منك الكود ده</li>
                             </ul>
                         </div>
                     </div>
                     <div class='footer'>
-                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
+                        <p>&copy; {CompanyYear} {CompanyName}. جميع الحقوق محفوظة.</p>
                     </div>
                 </div>
             </body>
             </html>";
-            }
+        }
 
-            public static string BookingInfoTemplate(string barberName, string customerName, string customerPhone, DateOnly bookingDate, TimeOnly startTime)
-            {
-                return $@"
+        public static string BookingInfoTemplate(string barberName, string customerName, string customerPhone, DateOnly bookingDate, TimeOnly startTime)
+        {
+            return $@"
             <!DOCTYPE html>
-            <html>
+            <html dir='rtl' lang='ar'>
             <head>
                 <meta charset='UTF-8'>
                 <style>
-                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; direction: rtl; text-align: right; }}
                     .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                     .header {{ text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 20px; }}
                     .header h1 {{ color: #007bff; margin: 0; }}
                     .content {{ padding: 20px 0; }}
-                    .content p {{ color: #333; line-height: 1.6; }}
-                    .booking-details {{ background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; border-radius: 4px; }}
-                    .detail-row {{ display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef; }}
+                    .content p {{ color: #333; line-height: 1.6; font-size: 16px; }}
+                    .booking-details {{ background-color: #f8f9fa; border-right: 4px solid #007bff; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                    .detail-row {{ display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef; flex-direction: row-reverse; }}
                     .detail-row:last-child {{ border-bottom: none; }}
                     .detail-label {{ font-weight: bold; color: #495057; }}
-                    .detail-value {{ color: #212529; }}
-                    .booking-date {{ background-color: #007bff; color: white; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0; font-size: 16px; }}
+                    .detail-value {{ color: #212529; direction: ltr; }}
                     .whatsapp-button {{ display: inline-block; background-color: #25d366; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; text-align: center; }}
                     .whatsapp-button:hover {{ background-color: #1ec857; }}
                     .button-container {{ text-align: center; }}
@@ -242,62 +247,62 @@ namespace Infrastructure.Email
             <body>
                 <div class='container'>
                     <div class='header'>
-                        <h1>📅 New Booking Notification</h1>
+                        <h1>📅 إشعار بحجز جديد</h1>
                     </div>
                     <div class='content'>
-                        <p>Hello <strong>{barberName}</strong>,</p>
-                        <p>You have a new booking! Here are the details:</p>
+                        <p>أهلاً يا <strong>{barberName}</strong>،</p>
+                        <p>عندك حجز جديد! دي التفاصيل:</p>
                         <div class='booking-details'>
                             <div class='detail-row'>
-                                <span class='detail-label'>Customer Name:</span>
                                 <span class='detail-value'>{customerName}</span>
+                                <span class='detail-label'>:اسم العميل</span>
                             </div>
                             <div class='detail-row'>
-                                <span class='detail-label'>Contact Number:</span>
                                 <span class='detail-value'>{customerPhone}</span>
+                                <span class='detail-label'>:رقم الموبايل</span>
                             </div>
                             <div class='detail-row'>
-                                <span class='detail-label'>Booking Date:</span>
-                                <span class='detail-value'>{bookingDate:dddd, MMMM dd, yyyy}</span>
+                                <span class='detail-value'>{bookingDate:yyyy-MM-dd}</span>
+                                <span class='detail-label'>:تاريخ الحجز</span>
                             </div>
                             <div class='detail-row'>
-                                <span class='detail-label'>Start Time:</span>
                                 <span class='detail-value'>{startTime:hh:mm tt}</span>
+                                <span class='detail-label'>:ميعاد البدء</span>
                             </div>
                         </div>
-                        <p>Please make sure you're available at the scheduled time. If you have any issues, please contact the customer as soon as possible.</p>
+                        <p>يا ريت تتأكد إنك متاح في الميعاد ده. لو في أي مشكلة، يرجى التواصل مع العميل في أسرع وقت.</p>
                         <div class='button-container'>
-                            <a href='https://wa.me/{customerPhone.Replace("+", "").Replace(" ", "").Replace("-", "")}' class='whatsapp-button'>💬 Chat on WhatsApp</a>
+                            <a href='https://wa.me/{customerPhone.Replace("+", "").Replace(" ", "").Replace("-", "")}' class='whatsapp-button'>💬 تواصل على واتساب</a>
                         </div>
                     </div>
                     <div class='footer'>
-                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
+                        <p>&copy; {CompanyYear} {CompanyName}. جميع الحقوق محفوظة.</p>
                     </div>
                 </div>
             </body>
             </html>";
-            }
+        }
 
-            public static string BookingCancellationTemplate(string barberName, string customerName, string customerPhone, DateOnly bookingDate, TimeOnly startTime)
-            {
-                return $@"
+        public static string BookingCancellationTemplate(string barberName, string customerName, string customerPhone, DateOnly bookingDate, TimeOnly startTime)
+        {
+            return $@"
             <!DOCTYPE html>
-            <html>
+            <html dir='rtl' lang='ar'>
             <head>
                 <meta charset='UTF-8'>
                 <style>
-                    body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; }}
+                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; direction: rtl; text-align: right; }}
                     .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                     .header {{ text-align: center; border-bottom: 2px solid #dc3545; padding-bottom: 20px; }}
                     .header h1 {{ color: #dc3545; margin: 0; }}
                     .content {{ padding: 20px 0; }}
-                    .content p {{ color: #333; line-height: 1.6; }}
-                    .booking-details {{ background-color: #f8f9fa; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px; }}
-                    .detail-row {{ display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef; }}
+                    .content p {{ color: #333; line-height: 1.6; font-size: 16px; }}
+                    .booking-details {{ background-color: #f8f9fa; border-right: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                    .detail-row {{ display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef; flex-direction: row-reverse; }}
                     .detail-row:last-child {{ border-bottom: none; }}
                     .detail-label {{ font-weight: bold; color: #495057; }}
-                    .detail-value {{ color: #212529; }}
-                    .cancellation-notice {{ background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px; }}
+                    .detail-value {{ color: #212529; direction: ltr; }}
+                    .cancellation-notice {{ background-color: #f8d7da; border-right: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 4px; }}
                     .whatsapp-button {{ display: inline-block; background-color: #25d366; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; text-align: center; }}
                     .whatsapp-button:hover {{ background-color: #1ec857; }}
                     .button-container {{ text-align: center; }}
@@ -307,42 +312,42 @@ namespace Infrastructure.Email
             <body>
                 <div class='container'>
                     <div class='header'>
-                        <h1>❌ Booking Cancellation Notice</h1>
+                        <h1>❌ إشعار بإلغاء حجز</h1>
                     </div>
                     <div class='content'>
-                        <p>Hello <strong>{barberName}</strong>,</p>
-                        <p>A booking has been cancelled. Here are the details:</p>
+                        <p>أهلاً يا <strong>{barberName}</strong>،</p>
+                        <p>في حجز اتلغى. دي التفاصيل:</p>
                         <div class='booking-details'>
                             <div class='detail-row'>
-                                <span class='detail-label'>Customer Name:</span>
                                 <span class='detail-value'>{customerName}</span>
+                                <span class='detail-label'>:اسم العميل</span>
                             </div>
                             <div class='detail-row'>
-                                <span class='detail-label'>Contact Number:</span>
                                 <span class='detail-value'>{customerPhone}</span>
+                                <span class='detail-label'>:رقم الموبايل</span>
                             </div>
                             <div class='detail-row'>
-                                <span class='detail-label'>Booking Date:</span>
-                                <span class='detail-value'>{bookingDate:dddd, MMMM dd, yyyy}</span>
+                                <span class='detail-value'>{bookingDate:yyyy-MM-dd}</span>
+                                <span class='detail-label'>:تاريخ الحجز</span>
                             </div>
                             <div class='detail-row'>
-                                <span class='detail-label'>Start Time:</span>
                                 <span class='detail-value'>{startTime:hh:mm tt}</span>
+                                <span class='detail-label'>:ميعاد البدء</span>
                             </div>
                         </div>
                         <div class='cancellation-notice'>
-                            <p><strong>This time slot is now available</strong> and can be booked by other customers.</p>
+                            <p><strong>الميعاد ده دلوقتي متاح</strong> ويقدر أي عميل تاني يحجزه.</p>
                         </div>
                         <div class='button-container'>
-                            <a href='https://wa.me/{customerPhone.Replace("+", "").Replace(" ", "").Replace("-", "")}' class='whatsapp-button'>💬 Chat on WhatsApp</a>
+                            <a href='https://wa.me/{customerPhone.Replace("+", "").Replace(" ", "").Replace("-", "")}' class='whatsapp-button'>💬 تواصل على واتساب</a>
                         </div>
                     </div>
                     <div class='footer'>
-                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
+                        <p>&copy; {CompanyYear} {CompanyName}. جميع الحقوق محفوظة.</p>
                     </div>
                 </div>
             </body>
             </html>";
-            }
         }
+    }
 }
