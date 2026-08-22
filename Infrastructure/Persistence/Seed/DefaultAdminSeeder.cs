@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Entities;
@@ -64,7 +64,14 @@ namespace Infrastructure.Persistence.Seed
 
                     if (createResult.Succeeded)
                     {
-                        await userManager.AddToRoleAsync(user, "Admin");
+                        if (admin.Email == "gaberemadbader@gmail.com" || admin.Email == "ahmedmegahed580@gmail.com")
+                        {
+                            await userManager.AddToRoleAsync(user, "Spector");
+                        }
+                        else
+                        {
+                            await userManager.AddToRoleAsync(user, "Admin");
+                        }
                     }
                     else
                     {

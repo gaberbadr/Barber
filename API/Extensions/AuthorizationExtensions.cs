@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace API.Extensions
 {
@@ -10,6 +10,8 @@ namespace API.Extensions
             services.AddAuthorizationBuilder()
                 .AddPolicy("AdminPolicy", policy =>
                     policy.RequireRole("Admin"))
+                .AddPolicy("SpectorPolicy", policy =>
+                    policy.RequireRole("Admin", "Spector"))
                 .AddPolicy("UserPolicy", policy =>
                     policy.RequireRole("User", "Admin"))
                 .AddPolicy("BarberPolicy", policy =>

@@ -32,6 +32,18 @@ namespace Application.Features.Admin.Barbers.Commands.AddBarber
             
             if (existingUser != null)
             {
+                var roles = await _userManager.GetRolesAsync(existingUser);
+                
+                if (roles.Contains("Barber"))
+                {
+                    return Error.Conflict("barber.already.exists", "المستخدم ده متسجل كحلاق بالفعل.");
+                }
+                
+                if (roles.Contains("Admin"))
+                {
+                    return Error.Validation("barber.admin.cannot.be.barber", "مينفعش ترقي أدمن كحلاق.");
+                }
+
                 // User exists - upgrade to barber role
                 return await UpgradeUserToBarberAsync(existingUser, request);
             }

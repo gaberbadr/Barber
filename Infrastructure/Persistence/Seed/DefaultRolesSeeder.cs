@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Seed
@@ -7,7 +7,7 @@ namespace Infrastructure.Persistence.Seed
     {
         public static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
         {
-            string[] roles = { "Admin", "User", "Barber" };
+            string[] roles = { "Admin", "Spector", "User", "Barber" };
 
             foreach (var role in roles)
             {

@@ -27,7 +27,7 @@ using System.Linq;
 
 namespace API.Controllers
 {
-    [Authorize(Policy = "AdminPolicy")]
+    [Authorize(Policy = "SpectorPolicy")]
     public class AdminController : BaseApiController
     {
         private readonly IMediator _mediator;
@@ -93,6 +93,7 @@ namespace API.Controllers
         /// <summary>
         /// Search/filter all bookings.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("bookings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetBookings([FromQuery] GetAllBookingsApiRequest request)
@@ -113,6 +114,7 @@ namespace API.Controllers
         /// <summary>
         /// Get all users with search/filter.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("users")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUsers([FromQuery] GetAllUsersApiRequest request)
@@ -131,6 +133,7 @@ namespace API.Controllers
         /// <summary>
         /// Block a user.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("users/{id}/block")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -148,6 +151,7 @@ namespace API.Controllers
         /// <summary>
         /// Unblock a user.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("users/{id}/unblock")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -165,6 +169,7 @@ namespace API.Controllers
         /// <summary>
         /// Get all coupons with optional filtering.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("coupons")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetCoupons([FromQuery] GetAllCouponsApiRequest request)
@@ -182,6 +187,7 @@ namespace API.Controllers
         /// <summary>
         /// Create a new coupon.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("coupons")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -196,6 +202,7 @@ namespace API.Controllers
         /// <summary>
         /// Delete a coupon.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("coupons/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -209,6 +216,7 @@ namespace API.Controllers
         /// <summary>
         /// Get all barbers.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("barbers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetBarbers()
@@ -221,6 +229,7 @@ namespace API.Controllers
         /// <summary>
         /// Create a new barber.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("barbers")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -235,6 +244,7 @@ namespace API.Controllers
         /// <summary>
         /// Remove a barber (deactivate).
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("barbers/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -249,6 +259,7 @@ namespace API.Controllers
         /// <summary>
         /// Get global booking settings.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("settings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSettings()
@@ -261,6 +272,7 @@ namespace API.Controllers
         /// <summary>
         /// Update global booking settings.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("settings")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -291,6 +303,7 @@ namespace API.Controllers
         /// <summary>
         /// Update global shop working hours.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("shop-hours")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -313,6 +326,7 @@ namespace API.Controllers
         /// <summary>
         /// Create a new service.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("services")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -334,6 +348,7 @@ namespace API.Controllers
         /// <summary>
         /// Update an existing service.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("services/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -357,6 +372,7 @@ namespace API.Controllers
         /// <summary>
         /// Delete a service.
         /// </summary>
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("services/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
