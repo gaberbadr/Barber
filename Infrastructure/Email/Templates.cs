@@ -272,7 +272,7 @@ namespace Infrastructure.Email
                         </div>
                         <p>يا ريت تتأكد إنك متاح في الميعاد ده. لو في أي مشكلة، يرجى التواصل مع العميل في أسرع وقت.</p>
                         <div class='button-container'>
-                            <a href='https://wa.me/{customerPhone.Replace("+", "").Replace(" ", "").Replace("-", "")}' class='whatsapp-button'>💬 تواصل على واتساب</a>
+                            <a href='https://wa.me/{FormatPhoneForWhatsApp(customerPhone)}' class='whatsapp-button'>💬 تواصل على واتساب</a>
                         </div>
                     </div>
                     <div class='footer'>
@@ -339,7 +339,7 @@ namespace Infrastructure.Email
                             <p><strong>الميعاد ده دلوقتي متاح</strong> ويقدر أي عميل تاني يحجزه.</p>
                         </div>
                         <div class='button-container'>
-                            <a href='https://wa.me/{customerPhone.Replace("+", "").Replace(" ", "").Replace("-", "")}' class='whatsapp-button'>💬 تواصل على واتساب</a>
+                            <a href='https://wa.me/{FormatPhoneForWhatsApp(customerPhone)}' class='whatsapp-button'>💬 تواصل على واتساب</a>
                         </div>
                     </div>
                     <div class='footer'>
@@ -348,6 +348,20 @@ namespace Infrastructure.Email
                 </div>
             </body>
             </html>";
+        }
+
+        private static string FormatPhoneForWhatsApp(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone)) return "";
+            string formatted = phone.Replace("+", "").Replace(" ", "").Replace("-", "");
+            
+            // Handle Egyptian numbers that start with '01' and are 11 digits long
+            if (formatted.StartsWith("01") && formatted.Length == 11)
+            {
+                formatted = "2" + formatted;
+            }
+            
+            return formatted;
         }
     }
 }

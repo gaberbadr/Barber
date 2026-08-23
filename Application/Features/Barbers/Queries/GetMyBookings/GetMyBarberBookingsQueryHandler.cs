@@ -53,7 +53,7 @@ namespace Application.Features.Barbers.Queries.GetMyBookings
                 var barber = await _userManager.FindByIdAsync(booking.BarberId);
                 dto.CustomerName = customer?.FullName ?? "";
                 dto.BarberName = barber?.FullName ?? "";
-
+                dto.CustomerPhone = customer?.PhoneNumber ?? "Unknown";
                 var itemRepo = _unitOfWork.Repository<BookingItem, int>();
                 var items = await itemRepo.FindAsync(bi => bi.BookingId == booking.Id);
                 dto.Items = _mapper.Map<List<BookingItemDTO>>(items.ToList());

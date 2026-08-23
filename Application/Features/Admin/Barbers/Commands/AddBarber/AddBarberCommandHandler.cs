@@ -38,7 +38,10 @@ namespace Application.Features.Admin.Barbers.Commands.AddBarber
                 {
                     return Error.Conflict("barber.already.exists", "المستخدم ده متسجل كحلاق بالفعل.");
                 }
-                
+                if (roles.Contains("Spector"))
+                {
+                    return Error.Conflict("barber.already.exists", "المستخدم ده متسجل مراقب بالفعل.");
+                }
                 if (roles.Contains("Admin"))
                 {
                     return Error.Validation("barber.admin.cannot.be.barber", "مينفعش ترقي أدمن كحلاق.");
