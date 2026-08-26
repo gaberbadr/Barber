@@ -169,23 +169,23 @@ namespace Infrastructure.Email
             </html>";
         }
 
-        public static string OtpEmailTemplate(string userName, string otp, int expirationMinutes = 10)
+        public static string OtpEmailTemplate(string userName, string otp)
         {
             return $@"
             <!DOCTYPE html>
-            <html dir='rtl' lang='ar'>
+            <html lang='en'>
             <head>
                 <meta charset='UTF-8'>
                 <style>
-                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; direction: rtl; text-align: right; }}
+                    body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; }}
                     .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                     .header {{ text-align: center; border-bottom: 2px solid #ff9800; padding-bottom: 20px; }}
                     .header h1 {{ color: #ff9800; margin: 0; }}
                     .content {{ padding: 20px 0; }}
                     .content p {{ color: #333; line-height: 1.6; font-size: 16px; }}
                     .otp-box {{ background-color: #fff3e0; border: 2px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }}
-                    .otp-code {{ font-size: 32px; font-weight: bold; color: #ff9800; letter-spacing: 4px; font-family: 'Courier New', monospace; direction: ltr; display: inline-block; }}
-                    .security-info {{ background-color: #f3f3f3; border-right: 4px solid #ff9800; padding: 15px; margin: 20px 0; font-size: 13px; }}
+                    .otp-code {{ font-size: 32px; font-weight: bold; color: #ff9800; letter-spacing: 4px; font-family: 'Courier New', monospace; display: inline-block; }}
+                    .security-info {{ background-color: #f3f3f3; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0; font-size: 13px; }}
                     .security-info strong {{ color: #ff9800; }}
                     .footer {{ text-align: center; border-top: 1px solid #ddd; padding-top: 20px; color: #999; font-size: 12px; }}
                 </style>
@@ -193,26 +193,24 @@ namespace Infrastructure.Email
             <body>
                 <div class='container'>
                     <div class='header'>
-                        <h1>🔐 كود التحقق</h1>
+                        <h1>🔐 One-Time Password</h1>
                     </div>
                     <div class='content'>
-                        <p>أهلاً يا <strong>{userName}</strong>،</p>
-                        <p>كود التحقق الخاص بيك هو:</p>
+                        <p>Hello <strong>{userName}</strong>,</p>
+                        <p>Your One-Time Password (OTP) is:</p>
                         <div class='otp-box'>
                             <div class='otp-code'>{otp}</div>
                         </div>
                         <div class='security-info'>
-                            <p><strong>⏱️ هينتهي بعد:</strong> {expirationMinutes} دقايق</p>
-                            <p><strong>🔒 تعليمات الأمان:</strong></p>
-                            <ul style='margin: 10px 0; padding-right: 20px;'>
-                                <li>ماتشاركش الكود ده مع أي حد</li>
-                                <li>الكود ده بيستخدم مرة واحدة بس ومينفعش تستخدمه تاني</li>
-                                <li>فريقنا عمره ما هيطلب منك الكود ده</li>
+                            <p><strong>🔒 Security Reminder:</strong></p>
+                            <ul style='margin: 10px 0; padding-left: 20px;'>
+                                <li>Never share this OTP with anyone</li>
+                                <li>Our team will never ask you for this code</li>
                             </ul>
                         </div>
                     </div>
                     <div class='footer'>
-                        <p>&copy; {CompanyYear} {CompanyName}. جميع الحقوق محفوظة.</p>
+                        <p>&copy; {CompanyYear} {CompanyName}. All rights reserved.</p>
                     </div>
                 </div>
             </body>

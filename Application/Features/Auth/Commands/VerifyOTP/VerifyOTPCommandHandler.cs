@@ -52,10 +52,8 @@ namespace Application.Features.Auth.Commands.VerifyOTP
                 return Error.Failure("auth.otp.invalid", "كود التحقق غير صحيح.");
             }
 
-            // Mark email as confirmed and clear OTP
+            // Mark email as confirmed (Do not clear OTP to allow reuse during validity period)
             user.EmailConfirmed = true;
-            user.VerificationCode = null;
-            user.CodeExpiresAt = null;
 
             var updateResult = await _userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)

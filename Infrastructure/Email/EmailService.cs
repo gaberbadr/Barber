@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+using Application.Interfaces;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 
@@ -39,10 +39,9 @@ namespace Infrastructure.Email
             await _smtpEmailSender.SendEmailAsync(recipientEmail, title, htmlBody);
         }
 
-        public async Task SendOtpEmailAsync(string recipientEmail, string userName, string otp, int? expirationMinutes = null)
+        public async Task SendOtpEmailAsync(string recipientEmail, string userName, string otp)
         {
-            var expiration = expirationMinutes ?? _emailOptions.ExpirationMinutes;
-            var htmlBody = Templates.OtpEmailTemplate(userName, otp, expiration);
+            var htmlBody = Templates.OtpEmailTemplate(userName, otp);
             await _smtpEmailSender.SendEmailAsync(recipientEmail, "Your One-Time Password (OTP)", htmlBody);
         }
 

@@ -27,7 +27,7 @@ services:
       Email__SenderPassword: "${Email__SenderPassword}"
       Email__SenderDisplayName: "${Email__SenderDisplayName:-Gaber Company}"
       Email__EnableSsl: "${Email__EnableSsl:-true}"
-      Email__ExpirationMinutes: "${Email__ExpirationMinutes:-3}"
+      Email__ExpirationMinutes: "${Email__ExpirationMinutes:-720}"
       
       # Google Authentication
       Authentication__Google__ClientId: "${Authentication__Google__ClientId}"

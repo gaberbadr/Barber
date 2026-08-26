@@ -47,6 +47,12 @@ namespace Application.Features.Auth.Commands.SendOTP
                     return Error.Failure("auth.user.blocked", "حسابك موقوف. يرجى التواصل مع الدعم.");
                 }
 
+                // Check if an existing OTP is still valid
+                if (user.CodeExpiresAt != null && user.CodeExpiresAt > DateTime.UtcNow)
+                {
+                    return Error.Conflict("auth.otp.valid", "يوجد كود تحقق صالح بالفعل.");
+                }
+
                 // Generate OTP
                 var otp = new Random().Next(100000, 999999).ToString();
                 user.VerificationCode = otp;
