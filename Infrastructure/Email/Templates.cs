@@ -8,7 +8,7 @@ namespace Infrastructure.Email
 {
     public static class Templates
     {
-        private const string CompanyName = "Barber Shop";
+        private const string CompanyName = "MR.X";
         private const string CompanyYear = "2026";
 
         public static string WelcomeEmailTemplate(string userName, string activationLink)

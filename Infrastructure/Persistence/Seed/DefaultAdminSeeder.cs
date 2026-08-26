@@ -38,15 +38,15 @@ namespace Infrastructure.Persistence.Seed
                     UserName = "ahmedmegaed43@gmail.com",
                     Email = "ahmedmegaed43@gmail.com",
                     PhoneNumber = "01000000000",
-                    FullName = "spector",
+                    FullName = "Ahmed Megahed 2",
                     Password = "Admin@123"
                 },
-                 new
+                new
                 {
-                    UserName = "barbershopgm00@gmail.com",
-                    Email = "barbershopgm00@gmail.com",
+                    UserName = "abderhmanelgohary8@gmail.com",
+                    Email = "abderhmanelgohary8@gmail.com",
                     PhoneNumber = "01000000000",
-                    FullName = "owner",
+                    FullName = "Abderhman Elgohary",
                     Password = "Admin@123"
                 }
 
@@ -72,7 +72,7 @@ namespace Infrastructure.Persistence.Seed
 
                     if (createResult.Succeeded)
                     {
-                        if (admin.Email == "ahmedmegaed43@gmail.com" || admin.Email == "gggggg@gmail.com")
+                        if (admin.Email == "gaberemadbader@gmail.com" || admin.Email == "ahmedmegahed580@gmail.com")
                         {
                             await userManager.AddToRoleAsync(user, "Spector");
                         }
