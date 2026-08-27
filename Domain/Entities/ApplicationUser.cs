@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -32,6 +32,7 @@ namespace Domain.Entities
 
         // Profile picture stored from Cloudinary
         public string? ProfilePictureUrl { get; set; }
+        public string? ProfilePicturePublicId { get; set; }
 
         // Navigation Properties
         public ICollection<RefreshTokenTable> RefreshTokens { get; set; } = new List<RefreshTokenTable>();

@@ -42,8 +42,9 @@ namespace Application.Features.Auth.Commands.UpdateProfilePicture
                 return Error.Validation("image.empty", "مفيش ملف اتبعت.");
             }
 
-            // Store the old image URL for potential cleanup
+            // Store the old image URL and public ID for potential cleanup
             var oldProfilePictureUrl = user.ProfilePictureUrl;
+            var oldProfilePicturePublicId = user.ProfilePicturePublicId;
 
             try
             {
@@ -59,8 +60,9 @@ namespace Application.Features.Auth.Commands.UpdateProfilePicture
                         return uploadResult.Errors;
                     }
 
-                    // Update user with new image URL
+                    // Update user with new image URL and public ID
                     user.ProfilePictureUrl = uploadResult.Value.ImageUrl;
+                    user.ProfilePicturePublicId = uploadResult.Value.PublicId;
 
                     var updateResult = await _userManager.UpdateAsync(user);
                     if (!updateResult.Succeeded)
@@ -71,14 +73,9 @@ namespace Application.Features.Auth.Commands.UpdateProfilePicture
                     }
 
                     // Delete old image from Cloudinary if it existed
-                    if (!string.IsNullOrEmpty(oldProfilePictureUrl))
+                    if (!string.IsNullOrEmpty(oldProfilePicturePublicId))
                     {
-                        // Extract public ID from old URL
-                        var oldPublicId = ExtractPublicIdFromUrl(oldProfilePictureUrl);
-                        if (!string.IsNullOrEmpty(oldPublicId))
-                        {
-                            await _cloudinaryService.DeleteImageAsync(oldPublicId);
-                        }
+                        await _cloudinaryService.DeleteImageAsync(oldProfilePicturePublicId);
                     }
 
                     return new ProfilePictureResponseDTO
@@ -94,35 +91,6 @@ namespace Application.Features.Auth.Commands.UpdateProfilePicture
             }
         }
 
-        private string? ExtractPublicIdFromUrl(string imageUrl)
-        {
-            // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}.{ext}
-            try
-            {
-                var uri = new Uri(imageUrl);
-                var segments = uri.Segments;
 
-                // Find the "upload" segment and get the next segment
-                var uploadIndex = Array.FindIndex(segments, s => s.Contains("upload", StringComparison.OrdinalIgnoreCase));
-                if (uploadIndex >= 0 && uploadIndex < segments.Length - 1)
-                {
-                    var lastSegment = segments[uploadIndex + 1].TrimEnd('/');
-                    // Remove version prefix (v1234567890) if present
-                    if (lastSegment.StartsWith("v"))
-                    {
-                        lastSegment = lastSegment.Substring(lastSegment.IndexOf('/') + 1);
-                    }
-                    // Remove file extension
-                    var publicId = Path.GetFileNameWithoutExtension(lastSegment);
-                    return publicId;
-                }
-            }
-            catch
-            {
-                // If extraction fails, return null - old image will not be deleted
-            }
-
-            return null;
-        }
     }
 }

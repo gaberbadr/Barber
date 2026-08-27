@@ -32,22 +32,23 @@ namespace Application.Features.Auth.Commands.DeleteProfilePicture
             }
 
             // Check if user has a profile picture
-            if (string.IsNullOrEmpty(user.ProfilePictureUrl))
+            if (string.IsNullOrEmpty(user.ProfilePicturePublicId))
             {
                 return Error.NotFound("image.not.found", "المستخدم معندوش صورة شخصية.");
             }
 
             try
             {
-                // Extract public ID and delete from Cloudinary
-                var publicId = ExtractPublicIdFromUrl(user.ProfilePictureUrl);
-                if (!string.IsNullOrEmpty(publicId))
+                // Delete from Cloudinary
+                var deleteResult = await _cloudinaryService.DeleteImageAsync(user.ProfilePicturePublicId);
+                if (deleteResult.IsError)
                 {
-                    await _cloudinaryService.DeleteImageAsync(publicId);
+                    return deleteResult.Errors;
                 }
 
-                // Clear the URL from user
+                // Clear the URL and Public ID from user
                 user.ProfilePictureUrl = null;
+                user.ProfilePicturePublicId = null;
 
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
@@ -63,31 +64,6 @@ namespace Application.Features.Auth.Commands.DeleteProfilePicture
             }
         }
 
-        private string? ExtractPublicIdFromUrl(string imageUrl)
-        {
-            try
-            {
-                var uri = new Uri(imageUrl);
-                var segments = uri.Segments;
 
-                var uploadIndex = Array.FindIndex(segments, s => s.Contains("upload", StringComparison.OrdinalIgnoreCase));
-                if (uploadIndex >= 0 && uploadIndex < segments.Length - 1)
-                {
-                    var lastSegment = segments[uploadIndex + 1].TrimEnd('/');
-                    if (lastSegment.StartsWith("v"))
-                    {
-                        lastSegment = lastSegment.Substring(lastSegment.IndexOf('/') + 1);
-                    }
-                    var publicId = Path.GetFileNameWithoutExtension(lastSegment);
-                    return publicId;
-                }
-            }
-            catch
-            {
-                // If extraction fails, return null
-            }
-
-            return null;
-        }
     }
 }
