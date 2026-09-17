@@ -42,12 +42,25 @@ namespace Application.Features.Bookings.Queries.GetMyUpcoming
                     b.BookingDate >= today)
                 .OrderBy(b => b.BookingDate)
                 .ThenBy(b => b.StartTime)
-                .Select(b => new
+                .Select(b => new BookingDTO
                 {
-                    Booking = b,
-                    CustomerName = b.Customer != null ? b.Customer.FullName : null,
-                    CustomerPhone = b.Customer != null ? b.Customer.PhoneNumber : null,
-                    BarberName = b.Barber != null ? b.Barber.FullName : null,
+                    Id = b.Id,
+                    CustomerId = b.CustomerId,
+                    CustomerName = (b.Customer != null ? b.Customer.FullName : b.CustomerNameSnapshot) ?? "",
+                    CustomerPhone = b.Customer != null ? b.Customer.PhoneNumber : b.CustomerPhoneSnapshot,
+                    BarberId = b.BarberId,
+                    BarberName = (b.Barber != null ? b.Barber.FullName : null) ?? "",
+                    BookingDate = b.BookingDate,
+                    StartTime = b.StartTime,
+                    EndTime = b.EndTime,
+                    SubTotal = b.SubTotal,
+                    Discount = b.Discount,
+                    TotalPrice = b.TotalPrice,
+                    CouponCode = b.CouponCodeSnapshot,
+                    Status = b.Status.ToString(),
+                    CreatedAt = b.CreatedAt,
+                    CancelledAt = b.CancelledAt,
+                    CancelledBy = b.CancelledBy,
                     Items = b.BookingItems.Select(bi => new BookingItemDTO
                     {
                         Id = bi.Id,
@@ -61,18 +74,7 @@ namespace Application.Features.Bookings.Queries.GetMyUpcoming
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            var dtos = new List<BookingDTO>();
-            foreach (var item in bookingsQuery)
-            {
-                var dto = _mapper.Map<BookingDTO>(item.Booking);
-                dto.CustomerName = item.CustomerName ?? "";
-                dto.CustomerPhone = item.CustomerPhone;
-                dto.BarberName = item.BarberName ?? "";
-                dto.Items = item.Items;
-                dtos.Add(dto);
-            }
-
-            return dtos;
+            return bookingsQuery;
         }
     }
 }

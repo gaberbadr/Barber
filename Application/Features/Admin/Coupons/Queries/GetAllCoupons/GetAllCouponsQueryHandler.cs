@@ -25,7 +25,7 @@ namespace Application.Features.Admin.Coupons.Queries.GetAllCoupons
         {
             var couponRepo = _unitOfWork.Repository<Coupon, int>();
 
-            var query = couponRepo.GetIQueryable();
+            var query = couponRepo.GetIQueryable().AsNoTracking();
 
             if (request.IsActive.HasValue)
                 query = query.Where(c => c.IsActive == request.IsActive.Value);

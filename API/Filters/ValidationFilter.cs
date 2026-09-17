@@ -1,4 +1,4 @@
-﻿namespace API.Filters
+namespace API.Filters
 {
     public class ValidationFilter
     {

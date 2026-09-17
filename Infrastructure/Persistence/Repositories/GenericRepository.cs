@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -15,39 +15,39 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories
 {
-    public class GenaricRepository<TEntity, TKey> : IGenaricRepository<TEntity, TKey>
+    public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey>
      where TEntity : BaseEntity<TKey>
     {
         private readonly ApplicationDbContext _dbContext;
 
-        public GenaricRepository(ApplicationDbContext dBContext)
+        public GenericRepository(ApplicationDbContext dBContext)
         {
             _dbContext = dBContext;
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        public async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<TEntity>().ToListAsync();
+            return await _dbContext.Set<TEntity>().ToListAsync(cancellationToken);
         }
 
-        public async Task<TEntity> GetAsync(TKey id)
+        public async Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<TEntity>().FindAsync(id);
+            return await _dbContext.Set<TEntity>().FindAsync([id], cancellationToken);
         }
 
-        public async Task<TEntity?> GetByIdAsync(TKey id)
+        public async Task<TEntity?> GetByIdAsync(TKey id, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<TEntity>().FindAsync(id);
+            return await _dbContext.Set<TEntity>().FindAsync([id], cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsNoTrackingAsync()
+        public async Task<IEnumerable<TEntity>> GetAllAsNoTrackingAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<TEntity>().AsNoTracking().ToListAsync();
+            return await _dbContext.Set<TEntity>().AsNoTracking().ToListAsync(cancellationToken);
         }
 
-        public async Task<TEntity> GetAsNoTrackingAsync(TKey id)
+        public async Task<TEntity> GetAsNoTrackingAsync(TKey id, CancellationToken cancellationToken = default)
         {
-            var entity = await _dbContext.Set<TEntity>().FindAsync(id);
+            var entity = await _dbContext.Set<TEntity>().FindAsync([id], cancellationToken);
             if (entity != null)
             {
                 _dbContext.Entry(entity).State = EntityState.Detached;
@@ -55,9 +55,9 @@ namespace Infrastructure.Persistence.Repositories
             return entity;
         }
 
-        public async Task AddAsync(TEntity entity)
+        public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
-            await _dbContext.Set<TEntity>().AddAsync(entity);
+            await _dbContext.Set<TEntity>().AddAsync(entity, cancellationToken);
         }
 
         public void Update(TEntity entity)
@@ -70,48 +70,41 @@ namespace Infrastructure.Persistence.Repositories
             _dbContext.Set<TEntity>().Remove(entity);
         }
 
-        public async Task<TEntity?> DeleteAsync(TEntity entity)
+        public Task<TEntity?> DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
             _dbContext.Set<TEntity>().Remove(entity);
-            return entity;
+            return Task.FromResult<TEntity?>(entity);
         }
 
-        public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
+        public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Set<TEntity>().Where(predicate).ToListAsync();
+            return await _dbContext.Set<TEntity>().Where(predicate).ToListAsync(cancellationToken);
         }
 
         public async Task<TEntity?> FindFirstAsync(
-        Expression<Func<TEntity, bool>> predicate)
+        Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Set<TEntity>()
-                .FirstOrDefaultAsync(predicate);
+                .FirstOrDefaultAsync(predicate, cancellationToken);
         }
 
-        public async Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> predicate)
+        public async Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Set<TEntity>()
-                .FirstOrDefaultAsync(predicate);
+                .FirstOrDefaultAsync(predicate, cancellationToken);
         }
 
-        public async Task<int> DeleteRangeAsync(Expression<Func<TEntity, bool>> predicate)
+        public async Task<int> DeleteRangeAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            var entitiesToDelete = await _dbContext.Set<TEntity>().Where(predicate).ToListAsync();
-
-            if (entitiesToDelete.Any())
-            {
-                _dbContext.Set<TEntity>().RemoveRange(entitiesToDelete);
-            }
-
-            return entitiesToDelete.Count;
+            return await _dbContext.Set<TEntity>().Where(predicate).ExecuteDeleteAsync(cancellationToken);
         }
 
-        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
+        public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
         {
-            await _dbContext.Set<TEntity>().AddRangeAsync(entities);
+            await _dbContext.Set<TEntity>().AddRangeAsync(entities, cancellationToken);
         }
 
         public IQueryable<TEntity> GetIQueryable()
@@ -120,32 +113,32 @@ namespace Infrastructure.Persistence.Repositories
         }
 
         //refactor function specifications pattern
-        private IQueryable<TEntity> ApplySpecfications(ISpecifications<TEntity, TKey> spec)
+        private IQueryable<TEntity> ApplySpecifications(ISpecification<TEntity, TKey> spec)
         {
             return SpecificationsEvaluator<TEntity, TKey>.GetQuery(_dbContext.Set<TEntity>(), spec);
         }
 
-        public async Task<int> GetCountAsync(ISpecifications<TEntity, TKey> spec)
+        public async Task<int> GetCountAsync(ISpecification<TEntity, TKey> spec, CancellationToken cancellationToken = default)
         {
-            return await ApplySpecfications(spec).CountAsync();
+            return await ApplySpecifications(spec).CountAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllWithSpecficationAsync(ISpecifications<TEntity, TKey> spec)
+        public async Task<IEnumerable<TEntity>> GetAllWithSpecificationAsync(ISpecification<TEntity, TKey> spec, CancellationToken cancellationToken = default)
         {
-            return await ApplySpecfications(spec).ToListAsync();
+            return await ApplySpecifications(spec).ToListAsync(cancellationToken);
         }
 
-        public async Task<TEntity> GetWithSpecficationAsync(ISpecifications<TEntity, TKey> spec)
+        public async Task<TEntity> GetWithSpecificationAsync(ISpecification<TEntity, TKey> spec, CancellationToken cancellationToken = default)
         {
-            return await ApplySpecfications(spec).FirstOrDefaultAsync();
+            return await ApplySpecifications(spec).FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> FindWithSpecificationAsync(ISpecifications<TEntity, TKey> spec)
+        public async Task<IEnumerable<TEntity>> FindWithSpecificationAsync(ISpecification<TEntity, TKey> spec, CancellationToken cancellationToken = default)
         {
             if (spec == null)
                 throw new ArgumentNullException(nameof(spec));
 
-            return await ApplySpecfications(spec).ToListAsync();
+            return await ApplySpecifications(spec).ToListAsync(cancellationToken);
         }
     }
 }

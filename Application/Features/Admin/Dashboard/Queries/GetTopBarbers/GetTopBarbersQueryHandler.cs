@@ -43,6 +43,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetTopBarbers
 
             var barberIds = topBarbersData.Select(b => b.BarberId).ToList();
             var barbers = await _userManager.Users
+                .AsNoTracking()
                 .Where(u => barberIds.Contains(u.Id))
                 .ToDictionaryAsync(u => u.Id, u => u.FullName, cancellationToken);
 

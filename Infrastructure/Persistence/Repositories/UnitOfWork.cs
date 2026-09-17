@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,11 +26,11 @@ namespace Infrastructure.Persistence.Repositories
         }
 
         // Commits all pending changes to the database
-        public async Task<int> CompleteAsync()
+        public async Task<int> CompleteAsync(CancellationToken cancellationToken = default)
         {
             try
             {
-                return await _storeDbContext.SaveChangesAsync();
+                return await _storeDbContext.SaveChangesAsync(cancellationToken);
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -54,17 +54,17 @@ namespace Infrastructure.Persistence.Repositories
         }
 
         // Returns or creates a generic repository for the specified entity type
-        public IGenaricRepository<TEntity, Tkey> Repository<TEntity, Tkey>() where TEntity : BaseEntity<Tkey>
+        public IGenericRepository<TEntity, Tkey> Repository<TEntity, Tkey>() where TEntity : BaseEntity<Tkey>
         {
             var type = typeof(TEntity).Name;
 
             if (!_hashtableRepos.ContainsKey(type))
             {
-                var repo = new GenaricRepository<TEntity, Tkey>(_storeDbContext);
+                var repo = new GenericRepository<TEntity, Tkey>(_storeDbContext);
                 _hashtableRepos.Add(type, repo);
             }
 
-            return _hashtableRepos[type] as IGenaricRepository<TEntity, Tkey>;
+            return _hashtableRepos[type] as IGenericRepository<TEntity, Tkey>;
         }
 
         // Disposes the DbContext

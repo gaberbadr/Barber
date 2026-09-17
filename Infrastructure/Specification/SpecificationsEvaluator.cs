@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +13,7 @@ namespace Infrastructure.Specification
     public class SpecificationsEvaluator<TEntity, TKey> where TEntity : BaseEntity<TKey>
     {
 
-        public static IQueryable<TEntity> GetQuery(IQueryable<TEntity> inputQuery, ISpecifications<TEntity, TKey> spec)
+        public static IQueryable<TEntity> GetQuery(IQueryable<TEntity> inputQuery, ISpecification<TEntity, TKey> spec)
         {
             var query = inputQuery;
 
@@ -32,7 +32,7 @@ namespace Infrastructure.Specification
                 query = query.OrderByDescending(spec.OrderByDescending);
             }
 
-            if (spec.isPaginationEnapled)
+            if (spec.IsPaginationEnabled)
             {
                 query = query.Skip(spec.Skip).Take(spec.Take);
             }

@@ -20,7 +20,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllUsers
 
         public async Task<ErrorOr<PaginationResponse<AdminUserDTO>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
-            var query = _userManager.Users.Where(u => !u.IsDeleted);
+            var query = _userManager.Users.AsNoTracking().Where(u => !u.IsDeleted);
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
