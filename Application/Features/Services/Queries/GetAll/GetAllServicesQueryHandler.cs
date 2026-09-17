@@ -4,6 +4,7 @@ using Domain.Entities;
 using Domain.Repositories;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Services.Queries.GetAll
 {
@@ -21,9 +22,13 @@ namespace Application.Features.Services.Queries.GetAll
         public async Task<ErrorOr<List<ServiceDTO>>> Handle(GetAllServicesQuery request, CancellationToken cancellationToken)
         {
             var serviceRepo = _unitOfWork.Repository<Service, int>();
-            var services = await serviceRepo.FindAsync(s => s.IsActive && !s.IsDeleted);
+            var services = await serviceRepo.GetIQueryable()
+                .Where(s => s.IsActive && !s.IsDeleted)
+                .OrderBy(s => s.Name)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
 
-            var dtos = _mapper.Map<List<ServiceDTO>>(services.OrderBy(s => s.Name).ToList());
+            var dtos = _mapper.Map<List<ServiceDTO>>(services);
             return dtos;
         }
     }

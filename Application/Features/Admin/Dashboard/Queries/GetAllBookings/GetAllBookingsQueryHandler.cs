@@ -47,42 +47,50 @@ namespace Application.Features.Admin.Dashboard.Queries.GetAllBookings
                 status = parsedStatus;
             }
 
-            var bookings = await bookingRepo.FindAsync(b =>
-                (!request.Date.HasValue || b.BookingDate == request.Date.Value) &&
-                (string.IsNullOrEmpty(request.BarberId) || b.BarberId == request.BarberId) &&
-                (string.IsNullOrEmpty(request.CustomerId) || b.CustomerId == request.CustomerId) &&
-                (!status.HasValue || b.Status == status.Value));
+            var query = bookingRepo.GetIQueryable()
+                .Where(b =>
+                    (!request.Date.HasValue || b.BookingDate == request.Date.Value) &&
+                    (string.IsNullOrEmpty(request.BarberId) || b.BarberId == request.BarberId) &&
+                    (string.IsNullOrEmpty(request.CustomerId) || b.CustomerId == request.CustomerId) &&
+                    (!status.HasValue || b.Status == status.Value));
 
-            var totalCount = bookings.Count();
+            var totalCount = await query.CountAsync(cancellationToken);
 
-            var bookingList = bookings
+            var resultQuery = await query
                 .OrderByDescending(b => b.BookingDate)
                 .ThenByDescending(b => b.StartTime)
                 .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .ToList();
-
-            var result = new List<AdminBookingDTO>();
-
-            foreach (var booking in bookingList)
-            {
-                var barber = await _userManager.FindByIdAsync(booking.BarberId);
-
-                result.Add(new AdminBookingDTO
+                .Select(b => new 
                 {
-                    Id = booking.Id,
-                    CustomerName = booking.CustomerNameSnapshot ?? "Unknown",
-                    CustomerPhone = booking.CustomerPhoneSnapshot,
-                    CustomerEmail = booking.Customer?.Email ?? "",
-                    BarberName = barber?.FullName ?? "Unknown",
-                    BookingDate = booking.BookingDate,
-                    StartTime = booking.StartTime,
-                    EndTime = booking.EndTime,
-                    TotalPrice = booking.TotalPrice,
-                    Status = booking.Status.ToString(),
-                    CreatedAt = booking.CreatedAt
-                });
-            }
+                    Id = b.Id,
+                    CustomerNameSnapshot = b.CustomerNameSnapshot,
+                    CustomerPhoneSnapshot = b.CustomerPhoneSnapshot,
+                    CustomerEmail = b.Customer.Email,
+                    BarberName = b.Barber.FullName,
+                    BookingDate = b.BookingDate,
+                    StartTime = b.StartTime,
+                    EndTime = b.EndTime,
+                    TotalPrice = b.TotalPrice,
+                    Status = b.Status,
+                    CreatedAt = b.CreatedAt
+                })
+                .ToListAsync(cancellationToken);
+
+            var result = resultQuery.Select(b => new AdminBookingDTO
+            {
+                Id = b.Id,
+                CustomerName = b.CustomerNameSnapshot ?? "Unknown",
+                CustomerPhone = b.CustomerPhoneSnapshot,
+                CustomerEmail = b.CustomerEmail ?? "",
+                BarberName = b.BarberName ?? "Unknown",
+                BookingDate = b.BookingDate,
+                StartTime = b.StartTime,
+                EndTime = b.EndTime,
+                TotalPrice = b.TotalPrice,
+                Status = b.Status.ToString(),
+                CreatedAt = b.CreatedAt
+            }).ToList();
 
             return new PaginationResponse<AdminBookingDTO>(
                 request.PageSize,

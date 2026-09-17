@@ -28,38 +28,47 @@ namespace Application.Features.Admin.Dashboard.Queries.GetDashboardStats
 
         public async Task<ErrorOr<DashboardStatsDTO>> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
         {
-            var allUsers = await _userManager.Users.Where(u => !u.IsDeleted).ToListAsync(cancellationToken);
             var barbers = await _userManager.GetUsersInRoleAsync("Barber");
-            var barberIds = barbers.Select(b => b.Id).ToHashSet();
+            var barberIds = barbers.Select(b => b.Id).ToList();
+
+            var totalUsers = await _userManager.Users.CountAsync(u => !u.IsDeleted && !barberIds.Contains(u.Id), cancellationToken);
+            var activeUsers = await _userManager.Users.CountAsync(u => !u.IsDeleted && !barberIds.Contains(u.Id) && u.IsActive, cancellationToken);
+            var blockedUsers = await _userManager.Users.CountAsync(u => !u.IsDeleted && !barberIds.Contains(u.Id) && !u.IsActive, cancellationToken);
 
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
-            var allBookings = await bookingRepo.GetAllAsync();
+            var bookingQuery = bookingRepo.GetIQueryable();
 
             var serviceRepo = _unitOfWork.Repository<Service, int>();
-            var services = await serviceRepo.FindAsync(s => !s.IsDeleted);
+            var totalServices = await serviceRepo.GetIQueryable().CountAsync(s => !s.IsDeleted, cancellationToken);
 
             var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().Date);
             var firstOfMonth = new DateOnly(today.Year, today.Month, 1);
 
             var validBookingStatuses = new[] { BookingStatus.Confirmed, BookingStatus.Arrived, BookingStatus.DidNotArrive };
             
-            var confirmedBookings = allBookings.Where(b => validBookingStatuses.Contains(b.Status)).ToList();
-            var cancelledBookings = allBookings.Where(b => b.Status == BookingStatus.Cancelled).ToList();
+            var totalConfirmedBookings = await bookingQuery.CountAsync(b => validBookingStatuses.Contains(b.Status), cancellationToken);
+            var totalCancelledBookings = await bookingQuery.CountAsync(b => b.Status == BookingStatus.Cancelled, cancellationToken);
+            
+            var todayConfirmedBookings = await bookingQuery.CountAsync(b => validBookingStatuses.Contains(b.Status) && b.BookingDate == today, cancellationToken);
+            var thisMonthConfirmedBookings = await bookingQuery.CountAsync(b => validBookingStatuses.Contains(b.Status) && b.BookingDate >= firstOfMonth, cancellationToken);
+            
+            var totalConfirmedRevenue = await bookingQuery.Where(b => validBookingStatuses.Contains(b.Status)).SumAsync(b => b.TotalPrice, cancellationToken);
+            var thisMonthConfirmedRevenue = await bookingQuery.Where(b => validBookingStatuses.Contains(b.Status) && b.BookingDate >= firstOfMonth).SumAsync(b => b.TotalPrice, cancellationToken);
 
             var dto = new DashboardStatsDTO
             {
-                TotalUsers = allUsers.Count(u => !barberIds.Contains(u.Id)),
-                ActiveUsers = allUsers.Count(u => !barberIds.Contains(u.Id) && u.IsActive),
-                BlockedUsers = allUsers.Count(u => !barberIds.Contains(u.Id) && !u.IsActive),
+                TotalUsers = totalUsers,
+                ActiveUsers = activeUsers,
+                BlockedUsers = blockedUsers,
                 TotalBarbers = barbers.Count(b => !b.IsDeleted),
                 ActiveBarbers = barbers.Count(b => !b.IsDeleted && b.IsActive),
-                TotalServices = services.Count(),
-                TotalConfirmedBookings = confirmedBookings.Count,
-                TotalCancelledBookings = cancelledBookings.Count,
-                TodayConfirmedBookings = confirmedBookings.Count(b => b.BookingDate == today),
-                ThisMonthConfirmedBookings = confirmedBookings.Count(b => b.BookingDate >= firstOfMonth),
-                TotalConfirmedRevenue = confirmedBookings.Sum(b => b.TotalPrice),
-                ThisMonthConfirmedRevenue = confirmedBookings.Where(b => b.BookingDate >= firstOfMonth).Sum(b => b.TotalPrice)
+                TotalServices = totalServices,
+                TotalConfirmedBookings = totalConfirmedBookings,
+                TotalCancelledBookings = totalCancelledBookings,
+                TodayConfirmedBookings = todayConfirmedBookings,
+                ThisMonthConfirmedBookings = thisMonthConfirmedBookings,
+                TotalConfirmedRevenue = totalConfirmedRevenue,
+                ThisMonthConfirmedRevenue = thisMonthConfirmedRevenue
             };
 
             return dto;

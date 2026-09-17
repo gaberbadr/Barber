@@ -5,6 +5,7 @@ using Domain.Repositories;
 using ErrorOr;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Error = ErrorOr.Error;
 
 namespace Application.Features.Bookings.Queries.GetAvailableSlots
@@ -41,7 +42,7 @@ namespace Application.Features.Bookings.Queries.GetAvailableSlots
 
             // Get settings
             var settingsRepo = _unitOfWork.Repository<GlobalBookingSettings, int>();
-            var settings = (await settingsRepo.GetAllAsync()).FirstOrDefault();
+            var settings = await settingsRepo.GetIQueryable().FirstOrDefaultAsync(cancellationToken);
             if (settings == null)
                 return Error.Failure("settings.missing", "الإعدادات مش مظبوطة.");
 

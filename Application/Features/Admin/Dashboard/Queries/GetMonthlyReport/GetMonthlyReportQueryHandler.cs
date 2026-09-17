@@ -4,6 +4,7 @@ using Domain.Enums;
 using Domain.Repositories;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Error = ErrorOr.Error;
 
 namespace Application.Features.Admin.Dashboard.Queries.GetMonthlyReport
@@ -51,17 +52,26 @@ namespace Application.Features.Admin.Dashboard.Queries.GetMonthlyReport
             }
 
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
-            var bookings = await bookingRepo.FindAsync(b =>
-                b.BookingDate >= fromDate && b.BookingDate <= toDate);
-
-            var monthlyData = bookings
+            var monthlyDataQuery = await bookingRepo.GetIQueryable()
+                .Where(b => b.BookingDate >= fromDate && b.BookingDate <= toDate)
                 .GroupBy(b => new { b.BookingDate.Year, b.BookingDate.Month })
-                .Select(g => new MonthlyReportDTO
+                .Select(g => new 
                 {
-                    Month = $"{g.Key.Year}-{g.Key.Month:D2}",
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
                     ConfirmedBookingCount = g.Count(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Arrived || b.Status == BookingStatus.DidNotArrive),
                     CancelledBookingCount = g.Count(b => b.Status == BookingStatus.Cancelled),
                     TotalRevenue = g.Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Arrived || b.Status == BookingStatus.DidNotArrive).Sum(b => b.TotalPrice)
+                })
+                .ToListAsync(cancellationToken);
+
+            var monthlyData = monthlyDataQuery
+                .Select(m => new MonthlyReportDTO
+                {
+                    Month = $"{m.Year}-{m.Month:D2}",
+                    ConfirmedBookingCount = m.ConfirmedBookingCount,
+                    CancelledBookingCount = m.CancelledBookingCount,
+                    TotalRevenue = m.TotalRevenue
                 })
                 .OrderBy(m => m.Month)
                 .ToList();

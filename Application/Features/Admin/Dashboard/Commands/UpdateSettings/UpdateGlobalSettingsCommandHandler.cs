@@ -3,6 +3,7 @@ using Domain.Entities;
 using Domain.Repositories;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Error = ErrorOr.Error;
 
 namespace Application.Features.Admin.Dashboard.Commands.UpdateSettings
@@ -19,7 +20,7 @@ namespace Application.Features.Admin.Dashboard.Commands.UpdateSettings
         public async Task<ErrorOr<GlobalSettingsDTO>> Handle(UpdateGlobalSettingsCommand request, CancellationToken cancellationToken)
         {
             var repo = _unitOfWork.Repository<GlobalBookingSettings, int>();
-            var settings = (await repo.GetAllAsync()).FirstOrDefault();
+            var settings = await repo.GetIQueryable().FirstOrDefaultAsync(cancellationToken);
 
             if (settings == null)
                 return Error.NotFound("settings.not.found", "الإعدادات العامة مش مظبوطة.");

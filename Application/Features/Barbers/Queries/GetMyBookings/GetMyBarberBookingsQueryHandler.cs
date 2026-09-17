@@ -6,6 +6,7 @@ using Domain.Repositories;
 using ErrorOr;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Error = ErrorOr.Error;
 
 namespace Application.Features.Barbers.Queries.GetMyBookings
@@ -30,34 +31,45 @@ namespace Application.Features.Barbers.Queries.GetMyBookings
         {
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
 
-            var bookings = await bookingRepo.FindAsync(b =>
-                b.BarberId == request.BarberId &&
-                (!request.FromDate.HasValue || b.BookingDate >= request.FromDate.Value) &&
-                (!request.ToDate.HasValue || b.BookingDate <= request.ToDate.Value));
+            var query = bookingRepo.GetIQueryable()
+                .Where(b => b.BarberId == request.BarberId &&
+                            (!request.FromDate.HasValue || b.BookingDate >= request.FromDate.Value) &&
+                            (!request.ToDate.HasValue || b.BookingDate <= request.ToDate.Value));
 
-            var totalCount = bookings.Count();
+            var totalCount = await query.CountAsync(cancellationToken);
 
-            var bookingList = bookings
+            var bookingsQuery = await query
                 .OrderByDescending(b => b.BookingDate)
                 .ThenByDescending(b => b.StartTime)
                 .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .ToList();
+                .Select(b => new
+                {
+                    Booking = b,
+                    CustomerName = b.Customer != null ? b.Customer.FullName : null,
+                    CustomerPhone = b.Customer != null ? b.Customer.PhoneNumber : null,
+                    BarberName = b.Barber != null ? b.Barber.FullName : null,
+                    Items = b.BookingItems.Select(bi => new BookingItemDTO
+                    {
+                        Id = bi.Id,
+                        ServiceId = bi.ServiceId,
+                        ServiceName = bi.ServiceNameSnapshot,
+                        UnitPrice = bi.UnitPrice,
+                        Quantity = bi.Quantity,
+                        TotalPrice = bi.TotalPrice
+                    }).ToList()
+                })
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
 
             var dtos = new List<BookingDTO>();
-            foreach (var booking in bookingList)
+            foreach (var item in bookingsQuery)
             {
-                var dto = _mapper.Map<BookingDTO>(booking);
-
-                var customer = await _userManager.FindByIdAsync(booking.CustomerId);
-                var barber = await _userManager.FindByIdAsync(booking.BarberId);
-                dto.CustomerName = customer?.FullName ?? "";
-                dto.BarberName = barber?.FullName ?? "";
-                dto.CustomerPhone = customer?.PhoneNumber ?? "Unknown";
-                var itemRepo = _unitOfWork.Repository<BookingItem, int>();
-                var items = await itemRepo.FindAsync(bi => bi.BookingId == booking.Id);
-                dto.Items = _mapper.Map<List<BookingItemDTO>>(items.ToList());
-
+                var dto = _mapper.Map<BookingDTO>(item.Booking);
+                dto.CustomerName = item.CustomerName ?? "";
+                dto.CustomerPhone = item.CustomerPhone ?? "Unknown";
+                dto.BarberName = item.BarberName ?? "";
+                dto.Items = item.Items;
                 dtos.Add(dto);
             }
 

@@ -69,7 +69,7 @@ namespace Application.Features.Bookings.Commands.Create
 
             // 5. Get global settings
             var settingsRepo = _unitOfWork.Repository<GlobalBookingSettings, int>();
-            var settings = (await settingsRepo.GetAllAsync()).FirstOrDefault();
+            var settings = await settingsRepo.GetIQueryable().FirstOrDefaultAsync(cancellationToken);
             if (settings == null)
                 return Error.Failure("booking.settings.missing", "إعدادات الحجز مش مظبوطة.");
 

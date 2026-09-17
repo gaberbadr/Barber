@@ -5,6 +5,7 @@ using Domain.Repositories;
 using ErrorOr;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Error = ErrorOr.Error;
 
 namespace Application.Features.Admin.Dashboard.Queries.GetTopBarbers
@@ -26,9 +27,9 @@ namespace Application.Features.Admin.Dashboard.Queries.GetTopBarbers
         {
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
             var validBookingStatuses = new[] { BookingStatus.Confirmed, BookingStatus.Arrived, BookingStatus.DidNotArrive };
-            var confirmedBookings = await bookingRepo.FindAsync(b => validBookingStatuses.Contains(b.Status));
-
-            var topBarbers = confirmedBookings
+            
+            var topBarbersData = await bookingRepo.GetIQueryable()
+                .Where(b => validBookingStatuses.Contains(b.Status))
                 .GroupBy(b => b.BarberId)
                 .Select(g => new
                 {
@@ -38,20 +39,20 @@ namespace Application.Features.Admin.Dashboard.Queries.GetTopBarbers
                 })
                 .OrderByDescending(b => b.BookingCount)
                 .Take(request.Count)
-                .ToList();
+                .ToListAsync(cancellationToken);
 
-            var result = new List<TopBarberDTO>();
-            foreach (var item in topBarbers)
+            var barberIds = topBarbersData.Select(b => b.BarberId).ToList();
+            var barbers = await _userManager.Users
+                .Where(u => barberIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u.FullName, cancellationToken);
+
+            var result = topBarbersData.Select(item => new TopBarberDTO
             {
-                var barber = await _userManager.FindByIdAsync(item.BarberId);
-                result.Add(new TopBarberDTO
-                {
-                    BarberId = item.BarberId,
-                    BarberName = barber?.FullName ?? "Unknown",
-                    ConfirmedBookingCount = item.BookingCount,
-                    TotalRevenue = item.TotalRevenue
-                });
-            }
+                BarberId = item.BarberId,
+                BarberName = barbers.GetValueOrDefault(item.BarberId) ?? "Unknown",
+                ConfirmedBookingCount = item.BookingCount,
+                TotalRevenue = item.TotalRevenue
+            }).ToList();
 
             return result;
         }

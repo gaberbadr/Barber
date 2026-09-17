@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.BackgroundServices
 {
@@ -59,23 +60,17 @@ namespace Infrastructure.BackgroundServices
             // The local time provider is configured for Egypt Standard Time (Cairo)
             var today = DateOnly.FromDateTime(localNow.Date);
 
-            // Any confirmed booking before today's date should be marked as Didn't Arrive
-            var missedBookings = await bookingRepo.FindAsync(b => 
-                b.Status == BookingStatus.Confirmed && 
-                b.BookingDate < today);
+            var utcNow = _timeProvider.GetUtcNow().DateTime;
 
-            var count = missedBookings.Count();
+            // Any confirmed booking before today's date should be marked as Didn't Arrive
+            var count = await bookingRepo.GetIQueryable()
+                .Where(b => b.Status == BookingStatus.Confirmed && b.BookingDate < today)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(b => b.Status, BookingStatus.DidNotArrive)
+                    .SetProperty(b => b.UpdatedAt, utcNow));
+
             if (count > 0)
             {
-                var utcNow = _timeProvider.GetUtcNow().DateTime;
-                foreach (var booking in missedBookings)
-                {
-                    booking.Status = BookingStatus.DidNotArrive;
-                    booking.UpdatedAt = utcNow;
-                    bookingRepo.Update(booking);
-                }
-
-                await unitOfWork.CompleteAsync();
                 _logger.LogInformation("Updated {Count} missed bookings to DidNotArrive.", count);
             }
         }

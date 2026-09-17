@@ -4,6 +4,7 @@ using Domain.Enums;
 using Domain.Repositories;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Error = ErrorOr.Error;
 
 namespace Application.Features.Admin.Dashboard.Queries.GetTopServices
@@ -21,14 +22,15 @@ namespace Application.Features.Admin.Dashboard.Queries.GetTopServices
         {
             var bookingRepo = _unitOfWork.Repository<Booking, int>();
             var validBookingStatuses = new[] { BookingStatus.Confirmed, BookingStatus.Arrived, BookingStatus.DidNotArrive };
-            var confirmedBookingIds = (await bookingRepo.FindAsync(b => validBookingStatuses.Contains(b.Status)))
-                .Select(b => b.Id)
-                .ToHashSet();
+            
+            var confirmedBookingQuery = bookingRepo.GetIQueryable()
+                .Where(b => validBookingStatuses.Contains(b.Status))
+                .Select(b => b.Id);
 
             var bookingItemRepo = _unitOfWork.Repository<BookingItem, int>();
-            var items = await bookingItemRepo.FindAsync(bi => confirmedBookingIds.Contains(bi.BookingId));
-
-            var topServices = items
+            
+            var topServices = await bookingItemRepo.GetIQueryable()
+                .Where(bi => confirmedBookingQuery.Contains(bi.BookingId))
                 .GroupBy(bi => new { bi.ServiceId, bi.ServiceNameSnapshot })
                 .Select(g => new TopServiceDTO
                 {
@@ -39,7 +41,7 @@ namespace Application.Features.Admin.Dashboard.Queries.GetTopServices
                 })
                 .OrderByDescending(s => s.BookingCount)
                 .Take(request.Count)
-                .ToList();
+                .ToListAsync(cancellationToken);
 
             return topServices;
         }

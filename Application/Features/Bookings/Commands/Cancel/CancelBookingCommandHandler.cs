@@ -7,6 +7,7 @@ using Domain.Repositories;
 using ErrorOr;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Error = ErrorOr.Error;
 
 namespace Application.Features.Bookings.Commands.Cancel
@@ -57,7 +58,7 @@ namespace Application.Features.Bookings.Commands.Cancel
 
             // Get global settings
             var settingsRepo = _unitOfWork.Repository<GlobalBookingSettings, int>();
-            var settings = (await settingsRepo.GetAllAsync()).FirstOrDefault();
+            var settings = await settingsRepo.GetIQueryable().FirstOrDefaultAsync(cancellationToken);
             if (settings == null)
                 return Error.Failure("booking.settings.missing", "إعدادات الحجز مش مظبوطة.");
 
