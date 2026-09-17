@@ -35,14 +35,6 @@ namespace Infrastructure.Persistence.Seed
                 },
                 new
                 {
-                    UserName = "ahmedmegaed43@gmail.com",
-                    Email = "ahmedmegaed43@gmail.com",
-                    PhoneNumber = "01000000000",
-                    FullName = "Ahmed Megahed 2",
-                    Password = "Admin@123"
-                },
-                new
-                {
                     UserName = "abderhmanelgohary8@gmail.com",
                     Email = "abderhmanelgohary8@gmail.com",
                     PhoneNumber = "01000000000",

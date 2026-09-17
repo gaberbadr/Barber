@@ -14,7 +14,7 @@ namespace Controllers
             return Ok(new
             {
                 message = "أهلاً بيك في نظام الحلاق",
-                version = "2.5.1",
+                version = "2.5.5",
                 status = "Running",
                 documentation = $"{Request.Scheme}://{Request.Host}/swagger",
                 endpoints = new
